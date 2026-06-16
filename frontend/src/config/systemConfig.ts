@@ -11,6 +11,7 @@ export const systemConfig = {
     '正在检查页面结构...',
     '正在准备窗口内容...',
   ],
+  waitingTextSwitchDelayMs: 5000,
   appSearch: {
     minResults: 2,
     maxResults: 3,

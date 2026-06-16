@@ -5,6 +5,7 @@ import AppSearch from '@/apps/AppSearch/AppSearch.vue';
 import AboutApp from '@/apps/AboutApp/AboutApp.vue';
 import BrowserApp from '@/apps/BrowserApp/BrowserApp.vue';
 import SettingsApp from '@/apps/SettingsApp/SettingsApp.vue';
+import WindowLoadingOverlay from '@/components/loading/WindowLoadingOverlay.vue';
 import WindowResizeHandle from '@/components/window/WindowResizeHandle.vue';
 import WindowTitleBar from '@/components/window/WindowTitleBar.vue';
 import { useWindowStore } from '@/stores/windowStore';
@@ -49,6 +50,8 @@ const builtInComponent = computed(() => {
 
   return builtInApps[props.window.appId as BuiltInAppId] ?? null;
 });
+
+const loadingText = computed(() => props.window.loadingText ?? '正在准备窗口内容...');
 
 let stopPointerInteraction: (() => void) | null = null;
 
@@ -187,9 +190,21 @@ onBeforeUnmount(() => {
       @start-drag="startDrag"
     />
     <section class="app-window__body">
-      <div v-if="window.error" class="app-window__error" role="alert">{{ window.error }}</div>
-      <component :is="builtInComponent" v-else-if="builtInComponent" />
-      <div v-else class="app-window__placeholder">窗口内容暂未接入。</div>
+      <div class="app-window__content" :class="{ 'app-window__content--loading': window.loading }">
+        <component :is="builtInComponent" v-if="builtInComponent" />
+        <div v-else class="app-window__placeholder">窗口内容暂未接入。</div>
+      </div>
+      <div v-if="window.error" class="app-window__error" role="alert">
+        <span>{{ window.error }}</span>
+        <button class="app-window__retry" type="button" @click="windowStore.retryWindowOperation(window.id)">
+          重试
+        </button>
+      </div>
+      <WindowLoadingOverlay
+        v-if="window.loading"
+        :text="loadingText"
+        :text-key="window.loadingTextKey"
+      />
     </section>
     <template v-if="!window.maximized">
       <WindowResizeHandle
@@ -225,10 +240,19 @@ onBeforeUnmount(() => {
 }
 
 .app-window__body {
+  position: relative;
   min-height: 0;
-  padding: 20px;
   color: var(--color-text-primary);
   background: var(--color-window-bg);
+}
+
+.app-window__content {
+  height: 100%;
+  padding: 20px;
+}
+
+.app-window__content--loading {
+  user-select: none;
 }
 
 .app-window__placeholder {
@@ -239,10 +263,36 @@ onBeforeUnmount(() => {
 }
 
 .app-window__error {
-  padding: 12px;
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
   border: 1px solid #dc2626;
   border-radius: 8px;
   color: #991b1b;
   background: #fee2e2;
+  box-shadow: 0 14px 36px rgba(127, 29, 29, 0.16);
+}
+
+.app-window__retry {
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #991b1b;
+  border-radius: 8px;
+  color: #991b1b;
+  background: #ffffff;
+}
+
+.app-window__retry:hover,
+.app-window__retry:focus-visible {
+  color: #ffffff;
+  background: #991b1b;
+  outline: none;
 }
 </style>

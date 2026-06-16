@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 
+import { systemConfig } from '@/config/systemConfig';
 import type { BuiltInAppId } from '@/types/app';
 import type { WindowBounds, WindowState } from '@/types/window';
 
@@ -11,6 +12,7 @@ const MIN_WINDOW_HEIGHT = 240;
 const TITLE_BAR_HEIGHT = 40;
 const DESKTOP_EDGE_PADDING = 8;
 const TASKBAR_RESERVED_HEIGHT = 72;
+const loadingTextTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 const windowTitles: Record<BuiltInAppId, string> = {
   browser: '浏览器',
@@ -30,6 +32,51 @@ export const useWindowStore = defineStore('window', () => {
 
   function getWindow(windowId: string) {
     return windows.value.find((window) => window.id === windowId);
+  }
+
+  function pickWaitingText(previousText?: string | null) {
+    const waitingTexts: readonly string[] = systemConfig.waitingTexts;
+
+    if (waitingTexts.length === 1) {
+      return waitingTexts[0];
+    }
+
+    const nextTexts = previousText
+      ? waitingTexts.filter((waitingText) => waitingText !== previousText)
+      : waitingTexts;
+    const index = Math.floor(Math.random() * nextTexts.length);
+
+    return nextTexts[index];
+  }
+
+  function clearLoadingTextTimer(windowId: string) {
+    const timer = loadingTextTimers.get(windowId);
+
+    if (!timer) {
+      return;
+    }
+
+    clearTimeout(timer);
+    loadingTextTimers.delete(windowId);
+  }
+
+  function scheduleLoadingTextSwitch(windowId: string) {
+    clearLoadingTextTimer(windowId);
+
+    const timer = setTimeout(() => {
+      const window = getWindow(windowId);
+
+      if (!window || !window.loading) {
+        loadingTextTimers.delete(windowId);
+        return;
+      }
+
+      window.loadingText = pickWaitingText(window.loadingText);
+      window.loadingTextKey += 1;
+      scheduleLoadingTextSwitch(windowId);
+    }, systemConfig.waitingTextSwitchDelayMs);
+
+    loadingTextTimers.set(windowId, timer);
   }
 
   function getViewportBounds() {
@@ -187,7 +234,10 @@ export const useWindowStore = defineStore('window', () => {
       minimized: false,
       maximized: false,
       loading: false,
+      loadingText: null,
+      loadingTextKey: 0,
       error: null,
+      retryToken: 0,
       content: {
         kind: 'builtin',
       },
@@ -198,6 +248,7 @@ export const useWindowStore = defineStore('window', () => {
   }
 
   function closeWindow(windowId: string) {
+    clearLoadingTextTimer(windowId);
     windows.value = windows.value.filter((window) => window.id !== windowId);
 
     if (activeWindowId.value === windowId) {
@@ -249,7 +300,7 @@ export const useWindowStore = defineStore('window', () => {
 
   function updateWindowContent(
     windowId: string,
-    updates: Partial<Pick<WindowState, 'content' | 'title' | 'loading' | 'error'>>,
+    updates: Partial<Pick<WindowState, 'content' | 'title' | 'loading' | 'loadingText' | 'error'>>,
   ) {
     const window = getWindow(windowId);
 
@@ -258,12 +309,75 @@ export const useWindowStore = defineStore('window', () => {
     }
 
     Object.assign(window, updates);
+
+    if (updates.loading === false) {
+      clearLoadingTextTimer(windowId);
+      window.loadingText = updates.loadingText ?? null;
+    }
+
+    if (updates.loading === true) {
+      window.loadingText = updates.loadingText ?? pickWaitingText(window.loadingText);
+      window.loadingTextKey += 1;
+      scheduleLoadingTextSwitch(windowId);
+    }
+  }
+
+  function startWindowLoading(windowId: string) {
+    const window = getWindow(windowId);
+
+    if (!window) {
+      return;
+    }
+
+    window.loading = true;
+    window.loadingText = pickWaitingText(window.loadingText);
+    window.loadingTextKey += 1;
+    window.error = null;
+    scheduleLoadingTextSwitch(windowId);
+  }
+
+  function finishWindowLoading(windowId: string) {
+    const window = getWindow(windowId);
+
+    if (!window) {
+      return;
+    }
+
+    clearLoadingTextTimer(windowId);
+    window.loading = false;
+    window.loadingText = null;
+  }
+
+  function failWindowOperation(windowId: string, error: string) {
+    const window = getWindow(windowId);
+
+    if (!window) {
+      return;
+    }
+
+    clearLoadingTextTimer(windowId);
+    window.loading = false;
+    window.loadingText = null;
+    window.error = error;
+  }
+
+  function retryWindowOperation(windowId: string) {
+    const window = getWindow(windowId);
+
+    if (!window) {
+      return;
+    }
+
+    window.error = null;
+    window.retryToken += 1;
   }
 
   return {
     activeWindowId,
     closeWindow,
+    failWindowOperation,
     focusWindow,
+    finishWindowLoading,
     maximizeWindow,
     minimizeWindow,
     moveWindow,
@@ -272,6 +386,8 @@ export const useWindowStore = defineStore('window', () => {
     resizeWindow,
     restoreMaximizedWindow,
     restoreWindow,
+    retryWindowOperation,
+    startWindowLoading,
     toggleWindowFromTaskbar,
     toggleMaximizeWindow,
     updateWindowContent,

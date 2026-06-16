@@ -24,7 +24,10 @@ export interface WindowState extends WindowBounds {
   minimized: boolean;
   maximized: boolean;
   loading: boolean;
+  loadingText: string | null;
+  loadingTextKey: number;
   error: string | null;
+  retryToken: number;
   content: WindowContentState;
   restoreBounds?: WindowBounds;
 }
