@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount } from 'vue';
 
+import AppSearch from '@/apps/AppSearch/AppSearch.vue';
+import AboutApp from '@/apps/AboutApp/AboutApp.vue';
+import BrowserApp from '@/apps/BrowserApp/BrowserApp.vue';
+import SettingsApp from '@/apps/SettingsApp/SettingsApp.vue';
 import WindowResizeHandle from '@/components/window/WindowResizeHandle.vue';
 import WindowTitleBar from '@/components/window/WindowTitleBar.vue';
 import { useWindowStore } from '@/stores/windowStore';
+import type { BuiltInAppId } from '@/types/app';
 import type { WindowBounds, WindowResizeDirection, WindowState } from '@/types/window';
 
 const props = defineProps<{
@@ -22,6 +27,12 @@ const windowStore = useWindowStore();
 const MIN_WINDOW_WIDTH = 360;
 const MIN_WINDOW_HEIGHT = 240;
 const resizeDirections: WindowResizeDirection[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+const builtInApps = {
+  browser: BrowserApp,
+  appSearch: AppSearch,
+  settings: SettingsApp,
+  about: AboutApp,
+} satisfies Record<BuiltInAppId, unknown>;
 
 const windowStyle = computed(() => ({
   left: `${props.window.x}px`,
@@ -31,14 +42,12 @@ const windowStyle = computed(() => ({
   zIndex: props.window.zIndex,
 }));
 
-const contentMessage = computed(() => {
-  const payload = props.window.content.payload;
-
-  if (payload && typeof payload === 'object' && 'message' in payload) {
-    return String((payload as { message: string }).message);
+const builtInComponent = computed(() => {
+  if (props.window.content.kind !== 'builtin') {
+    return null;
   }
 
-  return '静态窗口内容';
+  return builtInApps[props.window.appId as BuiltInAppId] ?? null;
 });
 
 let stopPointerInteraction: (() => void) | null = null;
@@ -179,11 +188,8 @@ onBeforeUnmount(() => {
     />
     <section class="app-window__body">
       <div v-if="window.error" class="app-window__error" role="alert">{{ window.error }}</div>
-      <div v-else class="app-window__placeholder">
-        <p class="app-window__kind">{{ window.content.kind }}</p>
-        <h2>{{ window.title }}</h2>
-        <p>{{ contentMessage }}</p>
-      </div>
+      <component :is="builtInComponent" v-else-if="builtInComponent" />
+      <div v-else class="app-window__placeholder">窗口内容暂未接入。</div>
     </section>
     <template v-if="!window.maximized">
       <WindowResizeHandle
@@ -227,29 +233,9 @@ onBeforeUnmount(() => {
 
 .app-window__placeholder {
   display: grid;
-  align-content: center;
   height: 100%;
-  gap: 10px;
-  text-align: center;
-}
-
-.app-window__kind {
-  margin: 0;
-  color: var(--color-accent);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.app-window__placeholder h2 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.app-window__placeholder p {
-  margin: 0;
+  place-items: center;
   color: var(--color-text-secondary);
-  line-height: 1.7;
 }
 
 .app-window__error {

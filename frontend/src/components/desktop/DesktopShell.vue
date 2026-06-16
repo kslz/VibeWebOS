@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-
 import DesktopIcon from '@/components/desktop/DesktopIcon.vue';
 import StartMenu from '@/components/desktop/StartMenu.vue';
 import Taskbar from '@/components/desktop/Taskbar.vue';
@@ -13,8 +11,6 @@ import { useWindowStore } from '@/stores/windowStore';
 const desktopStore = useDesktopStore();
 const themeStore = useThemeStore();
 const windowStore = useWindowStore();
-
-const themeToggleText = computed(() => (themeStore.mode === 'light' ? '深色' : '浅色'));
 </script>
 
 <template>
@@ -32,9 +28,6 @@ const themeToggleText = computed(() => (themeStore.mode === 'light' ? '深色' :
         />
       </div>
 
-      <button class="desktop-shell__theme-toggle" type="button" @click="themeStore.toggleTheme">
-        切换{{ themeToggleText }}主题
-      </button>
     </section>
 
     <WindowManager />
@@ -81,24 +74,4 @@ const themeToggleText = computed(() => (themeStore.mode === 'light' ? '深色' :
   gap: 12px;
 }
 
-.desktop-shell__theme-toggle {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  min-width: 132px;
-  padding: 10px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 8px;
-  color: #ffffff;
-  background: rgba(15, 23, 42, 0.34);
-  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.2);
-  backdrop-filter: blur(12px);
-}
-
-.desktop-shell__theme-toggle:hover,
-.desktop-shell__theme-toggle:focus-visible {
-  border-color: rgba(255, 255, 255, 0.48);
-  background: rgba(15, 23, 42, 0.46);
-  outline: none;
-}
 </style>

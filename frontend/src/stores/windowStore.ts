@@ -2,7 +2,7 @@ import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 
 import type { BuiltInAppId } from '@/types/app';
-import type { WindowBounds, WindowContentState, WindowState } from '@/types/window';
+import type { WindowBounds, WindowState } from '@/types/window';
 
 const INITIAL_Z_INDEX = 20;
 const WINDOW_OFFSET = 32;
@@ -175,14 +175,6 @@ export const useWindowStore = defineStore('window', () => {
     nextWindowNumber.value += 1;
     nextZIndex.value += 1;
 
-    const content: WindowContentState = {
-      kind: 'builtin',
-      payload: {
-        appId,
-        message: `${title} 窗口内容将在后续任务中接入。`,
-      },
-    };
-
     windows.value.push({
       id: windowId,
       appId,
@@ -196,7 +188,9 @@ export const useWindowStore = defineStore('window', () => {
       maximized: false,
       loading: false,
       error: null,
-      content,
+      content: {
+        kind: 'builtin',
+      },
     });
 
     activeWindowId.value = windowId;
