@@ -3,11 +3,40 @@ import type { GeneratedAppCandidate } from './app';
 export type UserActionKind = 'click' | 'link' | 'submit';
 
 export interface UserAction {
-  kind: UserActionKind;
+  type: UserActionKind;
   targetTag: string;
   targetText: string;
   targetDescription: string;
-  formValues?: Record<string, string>;
+}
+
+export type FormValues = Record<string, string>;
+
+export interface AppSearchRequest {
+  query: string;
+}
+
+export interface AppGenerateRequest extends GeneratedAppCandidate {}
+
+export interface AppInteractRequest {
+  windowTitle: string;
+  currentSummary: string;
+  currentHtml: string;
+  userAction: UserAction;
+  formValues: FormValues;
+}
+
+export interface BrowserNavigateRequest {
+  input: string;
+  currentUrl: string;
+  currentSummary: string;
+}
+
+export interface BrowserInteractRequest {
+  currentUrl: string;
+  currentSummary: string;
+  currentHtml: string;
+  userAction: UserAction;
+  formValues: FormValues;
 }
 
 export interface LlmHtmlResponse {
@@ -25,7 +54,7 @@ export interface AppGenerateResponse extends LlmHtmlResponse {}
 export interface AppInteractResponse extends LlmHtmlResponse {}
 
 export interface BrowserNavigateResponse {
-  title: string;
+  pageTitle: string;
   url: string;
   html: string;
   summary: string;
@@ -34,6 +63,7 @@ export interface BrowserNavigateResponse {
 export interface BrowserInteractResponse extends BrowserNavigateResponse {}
 
 export interface FrontendApiError {
+  name: 'FrontendApiError';
   message: string;
   status?: number;
   code?: string;

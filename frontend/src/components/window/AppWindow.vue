@@ -191,7 +191,12 @@ onBeforeUnmount(() => {
     />
     <section class="app-window__body">
       <div class="app-window__content" :class="{ 'app-window__content--loading': window.loading }">
-        <component :is="builtInComponent" v-if="builtInComponent" />
+        <component
+          :is="builtInComponent"
+          v-if="builtInComponent"
+          :retry-token="window.retryToken"
+          :window-id="window.id"
+        />
         <div v-else class="app-window__placeholder">窗口内容暂未接入。</div>
       </div>
       <div v-if="window.error" class="app-window__error" role="alert">

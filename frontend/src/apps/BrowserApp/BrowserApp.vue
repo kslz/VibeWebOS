@@ -1,17 +1,92 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue';
+
+import { browserNavigate, LlmApiError } from '@/api/llmApi';
 import { systemConfig } from '@/config/systemConfig';
+import { useWindowStore } from '@/stores/windowStore';
+
+const props = defineProps<{
+  retryToken: number;
+  windowId: string;
+}>();
+
+const windowStore = useWindowStore();
+const browserInput = ref('');
+const currentUrl = ref('');
+const currentSummary = ref('');
+const pageTitle = ref<string>(systemConfig.browser.homeTitle);
+const lastSubmittedInput = ref('');
+
+async function navigate(nextInput = browserInput.value) {
+  const trimmedInput = nextInput.trim();
+
+  if (!trimmedInput) {
+    windowStore.failWindowOperation(props.windowId, '请输入网址、关键词或问题后再搜索。');
+    return;
+  }
+
+  lastSubmittedInput.value = trimmedInput;
+  const requestId = windowStore.startWindowLoading(props.windowId);
+
+  if (requestId === null) {
+    return;
+  }
+
+  try {
+    const response = await browserNavigate({
+      input: trimmedInput,
+      currentUrl: currentUrl.value,
+      currentSummary: currentSummary.value,
+    });
+
+    if (!windowStore.isWindowRequestCurrent(props.windowId, requestId)) {
+      return;
+    }
+
+    currentUrl.value = response.url;
+    currentSummary.value = response.summary;
+    pageTitle.value = response.pageTitle;
+    windowStore.updateWindowContent(
+      props.windowId,
+      {
+        content: {
+          kind: 'browserHtml',
+          payload: response,
+        },
+        title: response.pageTitle,
+      },
+      requestId,
+    );
+    windowStore.finishWindowLoading(props.windowId, requestId);
+  } catch (error) {
+    const message =
+      error instanceof LlmApiError ? error.message : '浏览器请求暂时不可用，请稍后重试。';
+
+    windowStore.failWindowOperation(props.windowId, message, requestId);
+  }
+}
+
+watch(
+  () => props.retryToken,
+  () => {
+    if (lastSubmittedInput.value) {
+      void navigate(lastSubmittedInput.value);
+    }
+  },
+);
 </script>
 
 <template>
   <section class="browser-app">
     <div class="browser-app__hero">
-      <p class="browser-app__eyebrow">{{ systemConfig.browser.homeTitle }}</p>
+      <p class="browser-app__eyebrow">{{ pageTitle }}</p>
       <h2>想看什么网页？</h2>
-      <form class="browser-app__search" @submit.prevent>
+      <form class="browser-app__search" @submit.prevent="navigate()">
         <label class="browser-app__label" for="browser-query">地址或搜索内容</label>
         <div class="browser-app__search-row">
           <input
             id="browser-query"
+            v-model="browserInput"
             class="browser-app__input"
             type="search"
             placeholder="输入网址、关键词或自然语言问题"

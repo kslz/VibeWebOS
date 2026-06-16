@@ -15,7 +15,7 @@ export interface BuiltInAppDefinition {
 }
 
 export interface GeneratedAppCandidate {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   appType: string;

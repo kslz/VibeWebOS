@@ -1,5 +1,61 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue';
+
+import { appSearch, LlmApiError } from '@/api/llmApi';
 import SearchResultList from '@/apps/AppSearch/SearchResultList.vue';
+import { useWindowStore } from '@/stores/windowStore';
+import type { GeneratedAppCandidate } from '@/types/app';
+
+const props = defineProps<{
+  retryToken: number;
+  windowId: string;
+}>();
+
+const windowStore = useWindowStore();
+const query = ref('');
+const lastSubmittedQuery = ref('');
+const results = ref<GeneratedAppCandidate[]>([]);
+
+async function submitSearch(nextQuery = query.value) {
+  const trimmedQuery = nextQuery.trim();
+
+  if (!trimmedQuery) {
+    windowStore.failWindowOperation(props.windowId, '请输入应用需求后再搜索。');
+    return;
+  }
+
+  lastSubmittedQuery.value = trimmedQuery;
+  const requestId = windowStore.startWindowLoading(props.windowId);
+
+  if (requestId === null) {
+    return;
+  }
+
+  try {
+    const response = await appSearch({ query: trimmedQuery });
+
+    if (!windowStore.isWindowRequestCurrent(props.windowId, requestId)) {
+      return;
+    }
+
+    results.value = response.results;
+    windowStore.finishWindowLoading(props.windowId, requestId);
+  } catch (error) {
+    const message =
+      error instanceof LlmApiError ? error.message : '应用搜索暂时不可用，请稍后重试。';
+
+    windowStore.failWindowOperation(props.windowId, message, requestId);
+  }
+}
+
+watch(
+  () => props.retryToken,
+  () => {
+    if (lastSubmittedQuery.value) {
+      void submitSearch(lastSubmittedQuery.value);
+    }
+  },
+);
 </script>
 
 <template>
@@ -8,11 +64,12 @@ import SearchResultList from '@/apps/AppSearch/SearchResultList.vue';
       <p class="app-search__eyebrow">应用搜索</p>
       <h2>描述你想要的应用</h2>
     </header>
-    <form class="app-search__form" @submit.prevent>
+    <form class="app-search__form" @submit.prevent="submitSearch()">
       <label class="app-search__label" for="app-search-query">应用需求</label>
       <div class="app-search__row">
         <input
           id="app-search-query"
+          v-model="query"
           class="app-search__input"
           type="search"
           placeholder="例如：一个项目进度看板"
@@ -20,7 +77,7 @@ import SearchResultList from '@/apps/AppSearch/SearchResultList.vue';
         <button class="app-search__button" type="submit">搜索</button>
       </div>
     </form>
-    <SearchResultList />
+    <SearchResultList :results="results" />
   </section>
 </template>
 

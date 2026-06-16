@@ -28,6 +28,8 @@ export interface WindowState extends WindowBounds {
   loadingTextKey: number;
   error: string | null;
   retryToken: number;
+  requestSequence: number;
+  activeRequestId: number | null;
   content: WindowContentState;
   restoreBounds?: WindowBounds;
 }

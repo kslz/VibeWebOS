@@ -238,6 +238,8 @@ export const useWindowStore = defineStore('window', () => {
       loadingTextKey: 0,
       error: null,
       retryToken: 0,
+      requestSequence: 0,
+      activeRequestId: null,
       content: {
         kind: 'builtin',
       },
@@ -301,10 +303,11 @@ export const useWindowStore = defineStore('window', () => {
   function updateWindowContent(
     windowId: string,
     updates: Partial<Pick<WindowState, 'content' | 'title' | 'loading' | 'loadingText' | 'error'>>,
+    requestId?: number,
   ) {
     const window = getWindow(windowId);
 
-    if (!window) {
+    if (!window || !isWindowRequestCurrent(windowId, requestId)) {
       return;
     }
 
@@ -326,32 +329,39 @@ export const useWindowStore = defineStore('window', () => {
     const window = getWindow(windowId);
 
     if (!window) {
-      return;
+      return null;
     }
 
+    window.requestSequence += 1;
+    window.activeRequestId = window.requestSequence;
     window.loading = true;
     window.loadingText = pickWaitingText(window.loadingText);
     window.loadingTextKey += 1;
     window.error = null;
     scheduleLoadingTextSwitch(windowId);
+
+    return window.activeRequestId;
   }
 
-  function finishWindowLoading(windowId: string) {
+  function finishWindowLoading(windowId: string, requestId?: number) {
     const window = getWindow(windowId);
 
-    if (!window) {
+    if (!window || !isWindowRequestCurrent(windowId, requestId)) {
       return;
     }
 
     clearLoadingTextTimer(windowId);
     window.loading = false;
     window.loadingText = null;
+    if (requestId !== undefined) {
+      window.activeRequestId = null;
+    }
   }
 
-  function failWindowOperation(windowId: string, error: string) {
+  function failWindowOperation(windowId: string, error: string, requestId?: number) {
     const window = getWindow(windowId);
 
-    if (!window) {
+    if (!window || !isWindowRequestCurrent(windowId, requestId)) {
       return;
     }
 
@@ -359,6 +369,9 @@ export const useWindowStore = defineStore('window', () => {
     window.loading = false;
     window.loadingText = null;
     window.error = error;
+    if (requestId !== undefined) {
+      window.activeRequestId = null;
+    }
   }
 
   function retryWindowOperation(windowId: string) {
@@ -370,6 +383,16 @@ export const useWindowStore = defineStore('window', () => {
 
     window.error = null;
     window.retryToken += 1;
+  }
+
+  function isWindowRequestCurrent(windowId: string, requestId?: number) {
+    if (requestId === undefined) {
+      return true;
+    }
+
+    const window = getWindow(windowId);
+
+    return Boolean(window && window.activeRequestId === requestId);
   }
 
   return {
@@ -386,6 +409,7 @@ export const useWindowStore = defineStore('window', () => {
     resizeWindow,
     restoreMaximizedWindow,
     restoreWindow,
+    isWindowRequestCurrent,
     retryWindowOperation,
     startWindowLoading,
     toggleWindowFromTaskbar,
