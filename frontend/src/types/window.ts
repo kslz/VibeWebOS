@@ -2,6 +2,8 @@ import type { AppId } from './app';
 
 export type WindowContentKind = 'builtin' | 'generatedHtml' | 'browserHtml' | 'empty';
 
+export type WindowResizeDirection = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+
 export interface WindowBounds {
   x: number;
   y: number;

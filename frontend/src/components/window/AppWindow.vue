@@ -1,19 +1,27 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount } from 'vue';
 
+import WindowResizeHandle from '@/components/window/WindowResizeHandle.vue';
 import WindowTitleBar from '@/components/window/WindowTitleBar.vue';
-import type { WindowState } from '@/types/window';
+import { useWindowStore } from '@/stores/windowStore';
+import type { WindowBounds, WindowResizeDirection, WindowState } from '@/types/window';
 
 const props = defineProps<{
   active: boolean;
   window: WindowState;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   close: [windowId: string];
   focus: [windowId: string];
+  maximize: [windowId: string];
   minimize: [windowId: string];
 }>();
+
+const windowStore = useWindowStore();
+const MIN_WINDOW_WIDTH = 360;
+const MIN_WINDOW_HEIGHT = 240;
+const resizeDirections: WindowResizeDirection[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
 
 const windowStyle = computed(() => ({
   left: `${props.window.x}px`,
@@ -32,20 +40,142 @@ const contentMessage = computed(() => {
 
   return '静态窗口内容';
 });
+
+let stopPointerInteraction: (() => void) | null = null;
+
+function stopCurrentPointerInteraction() {
+  stopPointerInteraction?.();
+  stopPointerInteraction = null;
+}
+
+function startDrag(event: PointerEvent) {
+  if (props.window.maximized) {
+    return;
+  }
+
+  emit('focus', props.window.id);
+  stopCurrentPointerInteraction();
+  event.preventDefault();
+
+  const origin = {
+    pointerX: event.clientX,
+    pointerY: event.clientY,
+    windowX: props.window.x,
+    windowY: props.window.y,
+  };
+
+  function handlePointerMove(moveEvent: PointerEvent) {
+    windowStore.moveWindow(
+      props.window.id,
+      origin.windowX + moveEvent.clientX - origin.pointerX,
+      origin.windowY + moveEvent.clientY - origin.pointerY,
+    );
+  }
+
+  function handlePointerUp() {
+    stopCurrentPointerInteraction();
+  }
+
+  globalThis.window.addEventListener('pointermove', handlePointerMove);
+  globalThis.window.addEventListener('pointerup', handlePointerUp, { once: true });
+  stopPointerInteraction = () => {
+    globalThis.window.removeEventListener('pointermove', handlePointerMove);
+    globalThis.window.removeEventListener('pointerup', handlePointerUp);
+  };
+}
+
+function startResize(direction: WindowResizeDirection, event: PointerEvent) {
+  if (props.window.maximized) {
+    return;
+  }
+
+  emit('focus', props.window.id);
+  stopCurrentPointerInteraction();
+  event.preventDefault();
+
+  const origin = {
+    pointerX: event.clientX,
+    pointerY: event.clientY,
+    bounds: {
+      x: props.window.x,
+      y: props.window.y,
+      width: props.window.width,
+      height: props.window.height,
+    },
+  };
+
+  function buildBounds(moveEvent: PointerEvent): WindowBounds {
+    const deltaX = moveEvent.clientX - origin.pointerX;
+    const deltaY = moveEvent.clientY - origin.pointerY;
+    const bounds = { ...origin.bounds };
+
+    if (direction.includes('e')) {
+      bounds.width = origin.bounds.width + deltaX;
+    }
+
+    if (direction.includes('s')) {
+      bounds.height = origin.bounds.height + deltaY;
+    }
+
+    if (direction.includes('w')) {
+      bounds.x = origin.bounds.x + deltaX;
+      bounds.width = origin.bounds.width - deltaX;
+
+      if (bounds.width < MIN_WINDOW_WIDTH) {
+        bounds.x = origin.bounds.x + origin.bounds.width - MIN_WINDOW_WIDTH;
+        bounds.width = MIN_WINDOW_WIDTH;
+      }
+    }
+
+    if (direction.includes('n')) {
+      bounds.y = origin.bounds.y + deltaY;
+      bounds.height = origin.bounds.height - deltaY;
+
+      if (bounds.height < MIN_WINDOW_HEIGHT) {
+        bounds.y = origin.bounds.y + origin.bounds.height - MIN_WINDOW_HEIGHT;
+        bounds.height = MIN_WINDOW_HEIGHT;
+      }
+    }
+
+    return bounds;
+  }
+
+  function handlePointerMove(moveEvent: PointerEvent) {
+    windowStore.resizeWindow(props.window.id, buildBounds(moveEvent));
+  }
+
+  function handlePointerUp() {
+    stopCurrentPointerInteraction();
+  }
+
+  globalThis.window.addEventListener('pointermove', handlePointerMove);
+  globalThis.window.addEventListener('pointerup', handlePointerUp, { once: true });
+  stopPointerInteraction = () => {
+    globalThis.window.removeEventListener('pointermove', handlePointerMove);
+    globalThis.window.removeEventListener('pointerup', handlePointerUp);
+  };
+}
+
+onBeforeUnmount(() => {
+  stopCurrentPointerInteraction();
+});
 </script>
 
 <template>
   <article
     class="app-window"
-    :class="{ 'app-window--active': active }"
+    :class="{ 'app-window--active': active, 'app-window--maximized': window.maximized }"
     :style="windowStyle"
     :aria-label="window.title"
     @pointerdown="$emit('focus', window.id)"
   >
     <WindowTitleBar
+      :maximized="window.maximized"
       :title="window.title"
       @close="$emit('close', window.id)"
+      @maximize="$emit('maximize', window.id)"
       @minimize="$emit('minimize', window.id)"
+      @start-drag="startDrag"
     />
     <section class="app-window__body">
       <div v-if="window.error" class="app-window__error" role="alert">{{ window.error }}</div>
@@ -55,6 +185,14 @@ const contentMessage = computed(() => {
         <p>{{ contentMessage }}</p>
       </div>
     </section>
+    <template v-if="!window.maximized">
+      <WindowResizeHandle
+        v-for="direction in resizeDirections"
+        :key="direction"
+        :direction="direction"
+        @start-resize="startResize"
+      />
+    </template>
   </article>
 </template>
 
@@ -63,8 +201,8 @@ const contentMessage = computed(() => {
   position: absolute;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  min-width: 320px;
-  min-height: 220px;
+  min-width: 360px;
+  min-height: 240px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -74,6 +212,10 @@ const contentMessage = computed(() => {
 
 .app-window--active {
   border-color: color-mix(in srgb, var(--color-accent) 58%, var(--color-border));
+}
+
+.app-window--maximized {
+  border-radius: 8px;
 }
 
 .app-window__body {

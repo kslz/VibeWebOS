@@ -14,6 +14,7 @@ const windowStore = useWindowStore();
       :window="window"
       @close="windowStore.closeWindow"
       @focus="windowStore.focusWindow"
+      @maximize="windowStore.toggleMaximizeWindow"
       @minimize="windowStore.minimizeWindow"
     />
   </section>

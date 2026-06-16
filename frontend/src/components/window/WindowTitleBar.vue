@@ -1,20 +1,35 @@
 <script setup lang="ts">
 defineProps<{
+  maximized: boolean;
   title: string;
 }>();
 
 defineEmits<{
   close: [];
+  maximize: [];
   minimize: [];
+  startDrag: [event: PointerEvent];
 }>();
 </script>
 
 <template>
-  <header class="window-title-bar">
+  <header
+    class="window-title-bar"
+    @dblclick="$emit('maximize')"
+    @pointerdown="$emit('startDrag', $event)"
+  >
     <span class="window-title-bar__title">{{ title }}</span>
     <div class="window-title-bar__controls" aria-label="窗口控制">
       <button class="window-title-bar__button" type="button" aria-label="最小化" @click.stop="$emit('minimize')">
         <span aria-hidden="true">−</span>
+      </button>
+      <button
+        class="window-title-bar__button"
+        type="button"
+        :aria-label="maximized ? '还原' : '最大化'"
+        @click.stop="$emit('maximize')"
+      >
+        <span aria-hidden="true">{{ maximized ? '❐' : '□' }}</span>
       </button>
       <button
         class="window-title-bar__button window-title-bar__button--close"
@@ -38,6 +53,7 @@ defineEmits<{
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text-primary);
   background: rgba(148, 163, 184, 0.1);
+  cursor: move;
   user-select: none;
 }
 
@@ -65,6 +81,7 @@ defineEmits<{
   border-radius: 8px;
   color: var(--color-text-primary);
   background: transparent;
+  cursor: pointer;
   font-size: 16px;
 }
 
