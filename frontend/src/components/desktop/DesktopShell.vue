@@ -4,12 +4,15 @@ import { computed } from 'vue';
 import DesktopIcon from '@/components/desktop/DesktopIcon.vue';
 import StartMenu from '@/components/desktop/StartMenu.vue';
 import Taskbar from '@/components/desktop/Taskbar.vue';
+import WindowManager from '@/components/window/WindowManager.vue';
 import { systemConfig } from '@/config/systemConfig';
 import { useDesktopStore } from '@/stores/desktopStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { useWindowStore } from '@/stores/windowStore';
 
 const desktopStore = useDesktopStore();
 const themeStore = useThemeStore();
+const windowStore = useWindowStore();
 
 const themeToggleText = computed(() => (themeStore.mode === 'light' ? '深色' : '浅色'));
 </script>
@@ -34,15 +37,19 @@ const themeToggleText = computed(() => (themeStore.mode === 'light' ? '深色' :
       </button>
     </section>
 
+    <WindowManager />
     <StartMenu
       v-if="desktopStore.isStartMenuOpen"
       :apps="desktopStore.desktopApps"
       @open="desktopStore.openApp"
     />
     <Taskbar
+      :active-window-id="windowStore.activeWindowId"
       :start-menu-open="desktopStore.isStartMenuOpen"
       :status-text="desktopStore.selectedAppTitle"
+      :windows="windowStore.openWindows"
       @toggle-start="desktopStore.toggleStartMenu"
+      @toggle-window="windowStore.toggleWindowFromTaskbar"
     />
   </main>
 </template>

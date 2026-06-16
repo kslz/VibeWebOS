@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
+import type { WindowState } from '@/types/window';
+
 defineProps<{
+  activeWindowId: string | null;
   startMenuOpen: boolean;
   statusText: string;
+  windows: WindowState[];
 }>();
 
 defineEmits<{
   toggleStart: [];
+  toggleWindow: [windowId: string];
 }>();
 
 const now = ref(new Date());
@@ -53,7 +58,17 @@ onBeforeUnmount(() => {
       <span aria-hidden="true">⊞</span>
     </button>
     <div class="taskbar__windows" aria-label="打开的窗口">
-      <span class="taskbar__placeholder">{{ statusText }}</span>
+      <button
+        v-for="window in windows"
+        :key="window.id"
+        class="taskbar__window"
+        :class="{ 'taskbar__window--active': activeWindowId === window.id && !window.minimized }"
+        type="button"
+        @click="$emit('toggleWindow', window.id)"
+      >
+        {{ window.title }}
+      </button>
+      <span v-if="windows.length === 0" class="taskbar__placeholder">{{ statusText }}</span>
     </div>
     <div class="taskbar__status" aria-label="系统状态">
       <span class="taskbar__network" aria-hidden="true">Wi-Fi</span>
@@ -107,8 +122,31 @@ onBeforeUnmount(() => {
 .taskbar__windows {
   display: flex;
   align-items: center;
+  gap: 6px;
   min-width: 0;
   height: 100%;
+}
+
+.taskbar__window {
+  max-width: 180px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  background: rgba(148, 163, 184, 0.1);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskbar__window:hover,
+.taskbar__window:focus-visible,
+.taskbar__window--active {
+  border-color: var(--color-border);
+  background: rgba(148, 163, 184, 0.2);
+  outline: none;
 }
 
 .taskbar__placeholder {

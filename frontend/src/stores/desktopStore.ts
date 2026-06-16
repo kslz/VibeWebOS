@@ -2,9 +2,12 @@ import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 
 import { systemConfig } from '@/config/systemConfig';
+import { useWindowStore } from '@/stores/windowStore';
 import type { BuiltInAppDefinition, BuiltInAppId } from '@/types/app';
 
-const appDefinitions: Record<BuiltInAppId, BuiltInAppDefinition & { iconSymbol: string }> = {
+type DesktopAppDefinition = BuiltInAppDefinition & { iconSymbol: string };
+
+const appDefinitions: Record<BuiltInAppId, DesktopAppDefinition> = {
   browser: {
     id: 'browser',
     title: '浏览器',
@@ -56,7 +59,10 @@ export const useDesktopStore = defineStore('desktop', () => {
   }
 
   function openApp(appId: BuiltInAppId) {
+    const windowStore = useWindowStore();
+
     lastOpenedAppId.value = appId;
+    windowStore.openWindow(appId);
     closeStartMenu();
   }
 
