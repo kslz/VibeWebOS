@@ -1,9 +1,13 @@
+<script setup lang="ts">
+import { systemConfig } from '@/config/systemConfig';
+</script>
+
 <template>
   <main class="vibe-webos">
     <section class="vibe-webos__panel" aria-label="VibeWebOS placeholder">
-      <p class="vibe-webos__eyebrow">VibeWebOS MVP</p>
-      <h1>欢迎来到 VibeWebOS</h1>
-      <p>一个正在搭建中的中文浏览器桌面系统。</p>
+      <p class="vibe-webos__eyebrow">{{ systemConfig.systemName }} MVP</p>
+      <h1>欢迎来到 {{ systemConfig.systemName }}</h1>
+      <p>{{ systemConfig.aboutText }}</p>
     </section>
   </main>
 </template>
@@ -49,7 +53,7 @@ select {
 }
 
 .vibe-webos__panel {
-  width: min(520px, 100%);
+  width: min(560px, 100%);
   padding: 32px;
   border: 1px solid rgba(148, 163, 184, 0.45);
   border-radius: 8px;
