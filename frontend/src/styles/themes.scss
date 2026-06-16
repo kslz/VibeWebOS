@@ -1,0 +1,27 @@
+[data-theme='light'] {
+  --color-desktop-bg:
+    radial-gradient(circle at 18% 20%, rgba(99, 179, 237, 0.36), transparent 28%),
+    linear-gradient(135deg, #f7fbff 0%, #dbeafe 46%, #eef2ff 100%);
+  --color-taskbar-bg: rgba(255, 255, 255, 0.76);
+  --color-window-bg: rgba(255, 255, 255, 0.96);
+  --color-panel-bg: rgba(255, 255, 255, 0.82);
+  --color-text-primary: #111827;
+  --color-text-secondary: #475569;
+  --color-border: rgba(148, 163, 184, 0.45);
+  --color-accent: #2563eb;
+  --shadow-window: 0 24px 80px rgba(15, 23, 42, 0.16);
+}
+
+[data-theme='dark'] {
+  --color-desktop-bg:
+    radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.24), transparent 30%),
+    linear-gradient(135deg, #111827 0%, #1e293b 50%, #312e81 100%);
+  --color-taskbar-bg: rgba(15, 23, 42, 0.72);
+  --color-window-bg: rgba(30, 41, 59, 0.96);
+  --color-panel-bg: rgba(15, 23, 42, 0.78);
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-border: rgba(148, 163, 184, 0.34);
+  --color-accent: #60a5fa;
+  --shadow-window: 0 24px 80px rgba(0, 0, 0, 0.34);
+}
