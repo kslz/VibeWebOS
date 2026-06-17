@@ -9,6 +9,7 @@ import {
 import type { GeneratedAppInteractionEvent } from '@/types/llm';
 
 const props = defineProps<{
+  enableInteractionBridge?: boolean;
   html: string;
   title: string;
 }>();
@@ -20,9 +21,15 @@ const emit = defineEmits<{
 const iframeRef = ref<HTMLIFrameElement | null>(null);
 const interactionBridgeScript = buildGeneratedInteractionBridgeScript(generatedInteractionMessageType);
 
-const sandboxHtml = computed(() => `${props.html}\n${interactionBridgeScript}`);
+const sandboxHtml = computed(() =>
+  props.enableInteractionBridge === false ? props.html : `${props.html}\n${interactionBridgeScript}`,
+);
 
 function handleMessage(event: MessageEvent) {
+  if (props.enableInteractionBridge === false) {
+    return;
+  }
+
   if (
     !isGeneratedAppInteractionMessage(
       event.data,

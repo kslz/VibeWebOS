@@ -23,11 +23,23 @@ export interface WindowLevelLlmContext {
   recentInteractionSummaries: string[];
 }
 
+export interface BrowserWindowLevelLlmContext extends WindowLevelLlmContext {
+  currentUrl: string;
+}
+
 export interface GeneratedAppWindowPayload {
   candidate: GeneratedAppCandidate;
   html: string;
   summary: string;
   context: WindowLevelLlmContext;
+}
+
+export interface BrowserWindowPayload {
+  pageTitle: string;
+  url: string;
+  html: string;
+  summary: string;
+  context: BrowserWindowLevelLlmContext;
 }
 
 export interface AppSearchRequest {

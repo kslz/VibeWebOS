@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 
 import { systemConfig } from '@/config/systemConfig';
 import type { BuiltInAppId, GeneratedAppCandidate } from '@/types/app';
-import type { AppGenerateResponse, GeneratedAppWindowPayload } from '@/types/llm';
+import type { AppGenerateResponse, BrowserNavigateResponse, BrowserWindowPayload, GeneratedAppWindowPayload } from '@/types/llm';
 import type { WindowBounds, WindowState } from '@/types/window';
 
 const INITIAL_Z_INDEX = 20;
@@ -244,11 +244,28 @@ export const useWindowStore = defineStore('window', () => {
       activeRequestId: null,
       content: {
         kind: 'builtin',
+        payload: appId === 'browser' ? createBrowserPayload() : undefined,
       },
     });
 
     activeWindowId.value = windowId;
     return windowId;
+  }
+
+  function createBrowserPayload(): BrowserWindowPayload {
+    return {
+      pageTitle: systemConfig.browser.homeTitle,
+      url: '',
+      html: '',
+      summary: '',
+      context: {
+        currentHtml: '',
+        currentSummary: '',
+        temporaryFormValues: {},
+        recentInteractionSummaries: [],
+        currentUrl: '',
+      },
+    };
   }
 
   function createGeneratedAppPayload(candidate: GeneratedAppCandidate): GeneratedAppWindowPayload {
@@ -352,6 +369,47 @@ export const useWindowStore = defineStore('window', () => {
       interactionSummary,
     ].slice(-MAX_RECENT_INTERACTION_SUMMARIES);
     window.title = response.windowTitle;
+  }
+
+  function getBrowserPayload(windowId: string) {
+    const window = getWindow(windowId);
+
+    if (window?.appId !== 'browser' || window.content.kind !== 'builtin') {
+      return null;
+    }
+
+    if (!window.content.payload) {
+      window.content.payload = createBrowserPayload();
+    }
+
+    return window.content.payload as BrowserWindowPayload;
+  }
+
+  function setBrowserPageContent(
+    windowId: string,
+    response: BrowserNavigateResponse,
+    requestId?: number,
+  ) {
+    const window = getWindow(windowId);
+
+    if (!window || window.appId !== 'browser' || window.content.kind !== 'builtin' || !isWindowRequestCurrent(windowId, requestId)) {
+      return;
+    }
+
+    const payload = getBrowserPayload(windowId);
+
+    if (!payload) {
+      return;
+    }
+
+    payload.pageTitle = response.pageTitle;
+    payload.url = response.url;
+    payload.html = response.html;
+    payload.summary = response.summary;
+    payload.context.currentUrl = response.url;
+    payload.context.currentHtml = response.html;
+    payload.context.currentSummary = response.summary;
+    window.title = response.pageTitle;
   }
 
   function closeWindow(windowId: string) {
@@ -518,6 +576,8 @@ export const useWindowStore = defineStore('window', () => {
     restoreWindow,
     isWindowRequestCurrent,
     retryWindowOperation,
+    getBrowserPayload,
+    setBrowserPageContent,
     setGeneratedAppContent,
     startWindowLoading,
     toggleWindowFromTaskbar,

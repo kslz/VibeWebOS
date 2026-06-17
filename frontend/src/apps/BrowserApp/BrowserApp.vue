@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { browserNavigate, LlmApiError } from '@/api/llmApi';
+import HtmlSandboxView from '@/components/generated/HtmlSandboxView.vue';
 import { systemConfig } from '@/config/systemConfig';
 import { useWindowStore } from '@/stores/windowStore';
 
@@ -12,13 +13,16 @@ const props = defineProps<{
 
 const windowStore = useWindowStore();
 const browserInput = ref('');
-const currentUrl = ref('');
-const currentSummary = ref('');
-const pageTitle = ref<string>(systemConfig.browser.homeTitle);
 const lastSubmittedInput = ref('');
+const browserPayload = computed(() => windowStore.getBrowserPayload(props.windowId));
+const browserContext = computed(() => browserPayload.value?.context);
+const pageTitle = computed(() => browserPayload.value?.pageTitle ?? systemConfig.browser.homeTitle);
+const currentUrl = computed(() => browserPayload.value?.url ?? '');
+const browserHtml = computed(() => browserPayload.value?.html ?? '');
 
 async function navigate(nextInput = browserInput.value) {
   const trimmedInput = nextInput.trim();
+  const context = browserContext.value;
 
   if (!trimmedInput) {
     windowStore.failWindowOperation(props.windowId, '请输入网址、关键词或问题后再搜索。');
@@ -35,28 +39,15 @@ async function navigate(nextInput = browserInput.value) {
   try {
     const response = await browserNavigate({
       input: trimmedInput,
-      currentUrl: currentUrl.value,
-      currentSummary: currentSummary.value,
+      currentUrl: context?.currentUrl ?? '',
+      currentSummary: context?.currentSummary ?? '',
     });
 
     if (!windowStore.isWindowRequestCurrent(props.windowId, requestId)) {
       return;
     }
 
-    currentUrl.value = response.url;
-    currentSummary.value = response.summary;
-    pageTitle.value = response.pageTitle;
-    windowStore.updateWindowContent(
-      props.windowId,
-      {
-        content: {
-          kind: 'browserHtml',
-          payload: response,
-        },
-        title: response.pageTitle,
-      },
-      requestId,
-    );
+    windowStore.setBrowserPageContent(props.windowId, response, requestId);
     windowStore.finishWindowLoading(props.windowId, requestId);
   } catch (error) {
     const message =
@@ -78,7 +69,7 @@ watch(
 
 <template>
   <section class="browser-app">
-    <div class="browser-app__hero">
+    <div class="browser-app__toolbar" :class="{ 'browser-app__toolbar--home': !browserHtml }">
       <p class="browser-app__eyebrow">{{ pageTitle }}</p>
       <h2>想看什么网页？</h2>
       <form class="browser-app__search" @submit.prevent="navigate()">
@@ -94,23 +85,36 @@ watch(
           <button class="browser-app__button" type="submit">搜索</button>
         </div>
       </form>
+      <p v-if="currentUrl" class="browser-app__url">{{ currentUrl }}</p>
     </div>
+    <HtmlSandboxView
+      v-if="browserHtml"
+      :enable-interaction-bridge="false"
+      :html="browserHtml"
+      :title="pageTitle"
+    />
   </section>
 </template>
 
 <style lang="scss" scoped>
 .browser-app {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 100%;
-  place-items: center;
-  padding: 28px;
+  gap: 14px;
+  padding: 16px;
 }
 
-.browser-app__hero {
+.browser-app__toolbar {
   display: grid;
   width: min(680px, 100%);
   gap: 16px;
+  justify-self: center;
   text-align: center;
+}
+
+.browser-app__toolbar--home {
+  align-self: center;
 }
 
 .browser-app__eyebrow {
@@ -160,5 +164,14 @@ watch(
   border-radius: 8px;
   color: #ffffff;
   background: var(--color-accent);
+}
+
+.browser-app__url {
+  margin: -6px 0 0;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
