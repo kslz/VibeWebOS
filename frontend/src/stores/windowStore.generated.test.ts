@@ -61,4 +61,47 @@ describe('generated app windows', () => {
     expect(secondPayload).not.toHaveProperty('messages');
     expect(secondPayload).not.toHaveProperty('history');
   });
+
+  it('updates only the interacted generated window context after an app interaction', () => {
+    const store = useWindowStore();
+    const firstWindowId = store.openGeneratedAppWindow(candidate);
+    const secondWindowId = store.openGeneratedAppWindow({
+      ...candidate,
+      id: 'second-board',
+      name: 'Second Board',
+    });
+
+    store.setGeneratedAppContent(firstWindowId, {
+      windowTitle: 'Project Board',
+      html: '<main><button>Refresh</button></main>',
+      summary: 'Original first summary.',
+    });
+    store.setGeneratedAppContent(secondWindowId, {
+      windowTitle: 'Second Board',
+      html: '<main><button>Other</button></main>',
+      summary: 'Original second summary.',
+    });
+
+    store.applyGeneratedAppInteractionResponse(
+      firstWindowId,
+      {
+        windowTitle: 'Project Board',
+        html: '<main><h1>Updated</h1></main>',
+        summary: 'Updated first summary.',
+      },
+      'click button "Refresh"',
+    );
+
+    const firstWindow = store.windows.find((window) => window.id === firstWindowId);
+    const secondWindow = store.windows.find((window) => window.id === secondWindowId);
+    const firstPayload = firstWindow?.content.payload as GeneratedAppWindowPayload;
+    const secondPayload = secondWindow?.content.payload as GeneratedAppWindowPayload;
+
+    expect(firstPayload.context.currentHtml).toBe('<main><h1>Updated</h1></main>');
+    expect(firstPayload.context.currentSummary).toBe('Updated first summary.');
+    expect(firstPayload.context.recentInteractionSummaries).toEqual(['click button "Refresh"']);
+    expect(secondPayload.context.currentHtml).toBe('<main><button>Other</button></main>');
+    expect(secondPayload.context.currentSummary).toBe('Original second summary.');
+    expect(secondPayload.context.recentInteractionSummaries).toEqual([]);
+  });
 });

@@ -4,7 +4,7 @@ import { computed, onBeforeUnmount } from 'vue';
 import AppSearch from '@/apps/AppSearch/AppSearch.vue';
 import AboutApp from '@/apps/AboutApp/AboutApp.vue';
 import BrowserApp from '@/apps/BrowserApp/BrowserApp.vue';
-import { appGenerate, LlmApiError } from '@/api/llmApi';
+import { appGenerate, appInteract, LlmApiError } from '@/api/llmApi';
 import HtmlSandboxView from '@/components/generated/HtmlSandboxView.vue';
 import SettingsApp from '@/apps/SettingsApp/SettingsApp.vue';
 import WindowLoadingOverlay from '@/components/loading/WindowLoadingOverlay.vue';
@@ -12,7 +12,7 @@ import WindowResizeHandle from '@/components/window/WindowResizeHandle.vue';
 import WindowTitleBar from '@/components/window/WindowTitleBar.vue';
 import { useWindowStore } from '@/stores/windowStore';
 import type { BuiltInAppId } from '@/types/app';
-import type { GeneratedAppWindowPayload } from '@/types/llm';
+import type { GeneratedAppInteractionEvent, GeneratedAppWindowPayload, UserAction } from '@/types/llm';
 import type { WindowBounds, WindowResizeDirection, WindowState } from '@/types/window';
 
 const props = defineProps<{
@@ -94,6 +94,54 @@ async function retryWindowError() {
   } catch (error) {
     const message =
       error instanceof LlmApiError ? error.message : '应用生成暂时不可用，请稍后重试。';
+
+    windowStore.failWindowOperation(props.window.id, message, requestId);
+  }
+}
+
+function summarizeInteraction(userAction: UserAction) {
+  const text = userAction.targetText || userAction.targetDescription || userAction.targetTag;
+
+  return `${userAction.type} ${userAction.targetTag} "${text}"`.slice(0, 160);
+}
+
+async function handleGeneratedInteraction(interaction: GeneratedAppInteractionEvent) {
+  const generatedPayload = generatedAppPayload.value;
+
+  if (!generatedPayload || props.window.loading) {
+    return;
+  }
+
+  const requestId = windowStore.startWindowLoading(props.window.id);
+
+  if (requestId === null) {
+    return;
+  }
+
+  try {
+    const context = generatedPayload.context;
+    const response = await appInteract({
+      windowTitle: props.window.title,
+      currentSummary: context.currentSummary,
+      currentHtml: context.currentHtml,
+      userAction: interaction.userAction,
+      formValues: interaction.formValues,
+    });
+
+    if (!windowStore.isWindowRequestCurrent(props.window.id, requestId)) {
+      return;
+    }
+
+    windowStore.applyGeneratedAppInteractionResponse(
+      props.window.id,
+      response,
+      summarizeInteraction(interaction.userAction),
+      requestId,
+    );
+    windowStore.finishWindowLoading(props.window.id, requestId);
+  } catch (error) {
+    const message =
+      error instanceof LlmApiError ? error.message : '应用交互暂时不可用，请稍后重试。';
 
     windowStore.failWindowOperation(props.window.id, message, requestId);
   }
@@ -247,6 +295,7 @@ onBeforeUnmount(() => {
           v-else-if="generatedAppPayload"
           :html="generatedAppPayload.html"
           :title="window.title"
+          @interact="handleGeneratedInteraction"
         />
         <div v-else class="app-window__placeholder">窗口内容暂未接入。</div>
       </div>

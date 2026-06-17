@@ -11,6 +11,11 @@ export interface UserAction {
 
 export type FormValues = Record<string, string>;
 
+export interface GeneratedAppInteractionEvent {
+  userAction: UserAction;
+  formValues: FormValues;
+}
+
 export interface WindowLevelLlmContext {
   currentHtml: string;
   currentSummary: string;

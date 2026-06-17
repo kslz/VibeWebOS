@@ -13,6 +13,7 @@ const MIN_WINDOW_HEIGHT = 240;
 const TITLE_BAR_HEIGHT = 40;
 const DESKTOP_EDGE_PADDING = 8;
 const TASKBAR_RESERVED_HEIGHT = 72;
+const MAX_RECENT_INTERACTION_SUMMARIES = 6;
 const loadingTextTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 const windowTitles: Record<BuiltInAppId, string> = {
@@ -329,6 +330,30 @@ export const useWindowStore = defineStore('window', () => {
     window.title = response.windowTitle;
   }
 
+  function applyGeneratedAppInteractionResponse(
+    windowId: string,
+    response: AppGenerateResponse,
+    interactionSummary: string,
+    requestId?: number,
+  ) {
+    const window = getWindow(windowId);
+
+    if (!window || window.content.kind !== 'generatedHtml' || !isWindowRequestCurrent(windowId, requestId)) {
+      return;
+    }
+
+    const payload = window.content.payload as GeneratedAppWindowPayload;
+    payload.html = response.html;
+    payload.summary = response.summary;
+    payload.context.currentHtml = response.html;
+    payload.context.currentSummary = response.summary;
+    payload.context.recentInteractionSummaries = [
+      ...payload.context.recentInteractionSummaries,
+      interactionSummary,
+    ].slice(-MAX_RECENT_INTERACTION_SUMMARIES);
+    window.title = response.windowTitle;
+  }
+
   function closeWindow(windowId: string) {
     clearLoadingTextTimer(windowId);
     windows.value = windows.value.filter((window) => window.id !== windowId);
@@ -477,6 +502,7 @@ export const useWindowStore = defineStore('window', () => {
 
   return {
     activeWindowId,
+    applyGeneratedAppInteractionResponse,
     closeWindow,
     failWindowOperation,
     focusWindow,
