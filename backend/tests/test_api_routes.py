@@ -162,6 +162,7 @@ def test_route_returns_controlled_error_for_invalid_llm_json() -> None:
 
     assert response.status_code == 502
     assert response.json()["detail"]["code"] == "invalid_llm_response"
+    assert response.json()["detail"]["message"] == "LLM 返回内容格式不正确，请重试。"
 
 
 def test_route_returns_controlled_error_for_unsafe_html() -> None:
@@ -179,6 +180,7 @@ def test_route_returns_controlled_error_for_unsafe_html() -> None:
 
     assert response.status_code == 502
     assert response.json()["detail"]["code"] == "invalid_llm_response"
+    assert response.json()["detail"]["message"] == "LLM 返回内容格式不正确，请重试。"
 
 
 @pytest.mark.parametrize(
@@ -200,3 +202,8 @@ def test_route_returns_controlled_provider_errors(
 
     assert response.status_code == status_code
     assert response.json()["detail"]["code"] == code
+    assert response.json()["detail"]["message"] in {
+        "LLM 服务未配置，请先设置 API Key。",
+        "LLM 请求超时，请稍后重试。",
+        "LLM 服务暂时不可用，请稍后重试。",
+    }

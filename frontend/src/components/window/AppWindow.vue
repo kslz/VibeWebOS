@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 
 import AppSearch from '@/apps/AppSearch/AppSearch.vue';
 import AboutApp from '@/apps/AboutApp/AboutApp.vue';
@@ -29,6 +29,7 @@ const emit = defineEmits<{
 }>();
 
 const windowStore = useWindowStore();
+const lastGeneratedInteraction = ref<GeneratedAppInteractionEvent | null>(null);
 const MIN_WINDOW_WIDTH = 360;
 const MIN_WINDOW_HEIGHT = 240;
 const resizeDirections: WindowResizeDirection[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
@@ -77,6 +78,11 @@ async function retryWindowError() {
     return;
   }
 
+  if (lastGeneratedInteraction.value) {
+    void handleGeneratedInteraction(lastGeneratedInteraction.value);
+    return;
+  }
+
   const requestId = windowStore.startWindowLoading(props.window.id);
 
   if (requestId === null) {
@@ -91,6 +97,7 @@ async function retryWindowError() {
     }
 
     windowStore.setGeneratedAppContent(props.window.id, response, requestId);
+    lastGeneratedInteraction.value = null;
     windowStore.finishWindowLoading(props.window.id, requestId);
   } catch (error) {
     const message =
@@ -121,6 +128,7 @@ async function handleGeneratedInteraction(interaction: GeneratedAppInteractionEv
 
   try {
     const context = generatedPayload.context;
+    lastGeneratedInteraction.value = interaction;
     const response = await appInteract({
       windowTitle: props.window.title,
       currentSummary: context.currentSummary,
@@ -139,6 +147,7 @@ async function handleGeneratedInteraction(interaction: GeneratedAppInteractionEv
       summarizeInteraction(interaction.userAction),
       requestId,
     );
+    lastGeneratedInteraction.value = null;
     windowStore.finishWindowLoading(props.window.id, requestId);
   } catch (error) {
     const message =

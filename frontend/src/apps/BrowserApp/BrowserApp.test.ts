@@ -17,6 +17,8 @@ describe('BrowserApp', () => {
     expect(source).toContain('formValues: redactFormValues(interaction.formValues)');
     expect(source).toContain('windowStore.applyBrowserPageInteractionResponse');
     expect(source).toContain('handleBrowserInteraction');
+    expect(source).toContain('lastBrowserInteraction');
+    expect(source).toContain('void handleBrowserInteraction(lastBrowserInteraction.value)');
     expect(source).toContain('<HtmlSandboxView');
     expect(source).toContain('interaction-bridge-mode="browser"');
     expect(source).toContain('@interact="handleBrowserInteraction"');

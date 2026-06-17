@@ -54,14 +54,24 @@ async function postJson<TRequest, TResponse>(
   body: TRequest,
   signal?: AbortSignal,
 ): Promise<TResponse> {
-  const response = await fetch(`${API_BASE_PATH}${endpoint}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-    signal,
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_PATH}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new LlmApiError('请求已取消。', undefined, 'request_aborted');
+    }
+
+    throw new LlmApiError('无法连接到后端服务，请检查服务是否启动后重试。', undefined, 'network_error');
+  }
 
   if (!response.ok) {
     const error = await readErrorResponse(response);

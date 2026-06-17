@@ -16,6 +16,7 @@ const props = defineProps<{
 const windowStore = useWindowStore();
 const browserInput = ref('');
 const lastSubmittedInput = ref('');
+const lastBrowserInteraction = ref<GeneratedAppInteractionEvent | null>(null);
 const browserPayload = computed(() => windowStore.getBrowserPayload(props.windowId));
 const browserContext = computed(() => browserPayload.value?.context);
 const pageTitle = computed(() => browserPayload.value?.pageTitle ?? systemConfig.browser.homeTitle);
@@ -56,6 +57,7 @@ async function navigate(nextInput = browserInput.value) {
     }
 
     windowStore.setBrowserPageContent(props.windowId, response, requestId);
+    lastBrowserInteraction.value = null;
     windowStore.finishWindowLoading(props.windowId, requestId);
   } catch (error) {
     const message =
@@ -79,6 +81,7 @@ async function handleBrowserInteraction(interaction: GeneratedAppInteractionEven
   }
 
   try {
+    lastBrowserInteraction.value = interaction;
     const response = await browserInteract({
       currentUrl: context.currentUrl,
       currentSummary: context.currentSummary,
@@ -97,6 +100,7 @@ async function handleBrowserInteraction(interaction: GeneratedAppInteractionEven
       summarizeInteraction(interaction.userAction),
       requestId,
     );
+    lastBrowserInteraction.value = null;
     windowStore.finishWindowLoading(props.windowId, requestId);
   } catch (error) {
     const message =
@@ -109,6 +113,11 @@ async function handleBrowserInteraction(interaction: GeneratedAppInteractionEven
 watch(
   () => props.retryToken,
   () => {
+    if (lastBrowserInteraction.value) {
+      void handleBrowserInteraction(lastBrowserInteraction.value);
+      return;
+    }
+
     if (lastSubmittedInput.value) {
       void navigate(lastSubmittedInput.value);
     }

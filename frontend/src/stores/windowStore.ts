@@ -523,7 +523,7 @@ export const useWindowStore = defineStore('window', () => {
   function startWindowLoading(windowId: string) {
     const window = getWindow(windowId);
 
-    if (!window) {
+    if (!window || window.loading) {
       return null;
     }
 

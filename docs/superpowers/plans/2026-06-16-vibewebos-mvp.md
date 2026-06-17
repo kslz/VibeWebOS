@@ -537,16 +537,16 @@
 - Modify: `backend/app/api/app_interact.py`
 - Modify: `backend/app/api/browser.py`
 
-- [ ] Prevent repeated clicks from creating duplicate concurrent requests in the same window.
-- [ ] Ignore responses for windows that have already been closed.
-- [ ] Destroy a generated app or browser window's LLM context immediately when that window closes.
-- [ ] Verify stale responses cannot recreate or mutate context for a closed window.
-- [ ] Verify concurrent requests in different windows keep independent contexts.
-- [ ] Preserve previous usable HTML when interaction or browser requests fail.
-- [ ] Provide retry buttons for app search, app generation, app interaction, browser navigation, and browser interaction errors.
-- [ ] Ensure backend errors are normalized into frontend-friendly messages.
-- [ ] Verify backend timeout, non-JSON, missing fields, and parent-isolation violations show window-local errors.
-- [ ] Commit as `fix: harden llm request error handling`.
+- [x] Prevent repeated clicks from creating duplicate concurrent requests in the same window.
+- [x] Ignore responses for windows that have already been closed.
+- [x] Destroy a generated app or browser window's LLM context immediately when that window closes.
+- [x] Verify stale responses cannot recreate or mutate context for a closed window.
+- [x] Verify concurrent requests in different windows keep independent contexts.
+- [x] Preserve previous usable HTML when interaction or browser requests fail.
+- [x] Provide retry buttons for app search, app generation, app interaction, browser navigation, and browser interaction errors.
+- [x] Ensure backend errors are normalized into frontend-friendly messages.
+- [x] Verify backend timeout, non-JSON, missing fields, and parent-isolation violations show window-local errors.
+- [x] Commit as `fix: harden llm request error handling`.
 
 **Acceptance:**
 - Failures stay inside the affected window.
