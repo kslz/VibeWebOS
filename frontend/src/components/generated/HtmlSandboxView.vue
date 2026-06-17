@@ -2,15 +2,19 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 import {
+  buildBrowserInteractionBridgeScript,
   buildGeneratedInteractionBridgeScript,
   generatedInteractionMessageType,
   isGeneratedAppInteractionMessage,
 } from '@/components/generated/generatedInteractionBridge';
 import type { GeneratedAppInteractionEvent } from '@/types/llm';
 
+type InteractionBridgeMode = 'generated' | 'browser' | 'none';
+
 const props = defineProps<{
   enableInteractionBridge?: boolean;
   html: string;
+  interactionBridgeMode?: InteractionBridgeMode;
   title: string;
 }>();
 
@@ -19,14 +23,32 @@ const emit = defineEmits<{
 }>();
 
 const iframeRef = ref<HTMLIFrameElement | null>(null);
-const interactionBridgeScript = buildGeneratedInteractionBridgeScript(generatedInteractionMessageType);
+const activeInteractionBridgeMode = computed<InteractionBridgeMode>(() => {
+  if (props.interactionBridgeMode) {
+    return props.interactionBridgeMode;
+  }
+
+  return props.enableInteractionBridge === false ? 'none' : 'generated';
+});
+
+const interactionBridgeScript = computed(() => {
+  if (activeInteractionBridgeMode.value === 'browser') {
+    return buildBrowserInteractionBridgeScript(generatedInteractionMessageType);
+  }
+
+  if (activeInteractionBridgeMode.value === 'generated') {
+    return buildGeneratedInteractionBridgeScript(generatedInteractionMessageType);
+  }
+
+  return '';
+});
 
 const sandboxHtml = computed(() =>
-  props.enableInteractionBridge === false ? props.html : `${props.html}\n${interactionBridgeScript}`,
+  interactionBridgeScript.value ? `${props.html}\n${interactionBridgeScript.value}` : props.html,
 );
 
 function handleMessage(event: MessageEvent) {
-  if (props.enableInteractionBridge === false) {
+  if (activeInteractionBridgeMode.value === 'none') {
     return;
   }
 

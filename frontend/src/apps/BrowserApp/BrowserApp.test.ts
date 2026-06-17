@@ -12,7 +12,11 @@ describe('BrowserApp', () => {
     expect(source).toContain("currentUrl: context?.currentUrl ?? ''");
     expect(source).toContain("currentSummary: context?.currentSummary ?? ''");
     expect(source).toContain('windowStore.setBrowserPageContent');
+    expect(source).toContain('browserInteract');
+    expect(source).toContain('windowStore.applyBrowserPageInteractionResponse');
+    expect(source).toContain('handleBrowserInteraction');
     expect(source).toContain('<HtmlSandboxView');
-    expect(source).toContain(':enable-interaction-bridge="false"');
+    expect(source).toContain('interaction-bridge-mode="browser"');
+    expect(source).toContain('@interact="handleBrowserInteraction"');
   });
 });

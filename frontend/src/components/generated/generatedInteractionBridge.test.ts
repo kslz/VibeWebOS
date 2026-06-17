@@ -3,11 +3,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  buildBrowserInteractionBridgeScript,
   buildGeneratedInteractionBridgeScript,
   isGeneratedAppInteractionMessage,
 } from './generatedInteractionBridge';
 
 let bridgeInstalled = false;
+let browserBridgeInstalled = false;
 
 describe('generated interaction bridge', () => {
   function installBridge() {
@@ -152,5 +154,81 @@ describe('generated interaction bridge', () => {
     };
 
     expect(isGeneratedAppInteractionMessage(message, expectedSource, expectedSource)).toBe(true);
+  });
+});
+
+describe('browser interaction bridge', () => {
+  function installBrowserBridge() {
+    if (browserBridgeInstalled) {
+      return;
+    }
+
+    const script = buildBrowserInteractionBridgeScript('vibewebos:generated-interaction');
+    const scriptBody = script.match(/<script>\n([\s\S]*)<\/script>/)?.[1];
+
+    if (!scriptBody) {
+      throw new Error('Browser bridge script body not found');
+    }
+
+    window.eval(scriptBody);
+    browserBridgeInstalled = true;
+  }
+
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    vi.restoreAllMocks();
+  });
+
+  it('captures browser page link clicks', () => {
+    document.body.innerHTML = '<a href="https://example.com/project">项目详情</a>';
+    const postMessage = vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {});
+
+    installBrowserBridge();
+    document.querySelector('a')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(postMessage).toHaveBeenCalledTimes(1);
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'vibewebos:generated-interaction',
+        formValues: {},
+        userAction: expect.objectContaining({
+          type: 'link',
+          targetTag: 'a',
+          targetText: '项目详情',
+          targetDescription: expect.stringContaining('href=https://example.com/project'),
+        }),
+      }),
+      '*',
+    );
+  });
+
+  it('captures browser page form submissions with current values', () => {
+    document.body.innerHTML = `
+      <form action="/search">
+        <input name="keyword" value="项目管理" />
+        <select name="type"><option value="all" selected>全部</option></select>
+        <button type="submit">搜索</button>
+      </form>
+    `;
+    const postMessage = vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {});
+
+    installBrowserBridge();
+    document.querySelector('form')?.dispatchEvent(new SubmitEvent('submit', { bubbles: true }));
+
+    expect(postMessage).toHaveBeenCalledTimes(1);
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'vibewebos:generated-interaction',
+        formValues: {
+          keyword: '项目管理',
+          type: 'all',
+        },
+        userAction: expect.objectContaining({
+          type: 'submit',
+          targetTag: 'form',
+        }),
+      }),
+      '*',
+    );
   });
 });

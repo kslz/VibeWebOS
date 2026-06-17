@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 
-import { browserNavigate, LlmApiError } from '@/api/llmApi';
+import { browserInteract, browserNavigate, LlmApiError } from '@/api/llmApi';
 import HtmlSandboxView from '@/components/generated/HtmlSandboxView.vue';
 import { systemConfig } from '@/config/systemConfig';
 import { useWindowStore } from '@/stores/windowStore';
+import type { GeneratedAppInteractionEvent, UserAction } from '@/types/llm';
 
 const props = defineProps<{
   retryToken: number;
@@ -19,6 +20,12 @@ const browserContext = computed(() => browserPayload.value?.context);
 const pageTitle = computed(() => browserPayload.value?.pageTitle ?? systemConfig.browser.homeTitle);
 const currentUrl = computed(() => browserPayload.value?.url ?? '');
 const browserHtml = computed(() => browserPayload.value?.html ?? '');
+
+function summarizeInteraction(userAction: UserAction) {
+  const label = userAction.targetText || userAction.targetDescription || userAction.targetTag;
+
+  return `${userAction.type} ${userAction.targetTag} "${label}"`;
+}
 
 async function navigate(nextInput = browserInput.value) {
   const trimmedInput = nextInput.trim();
@@ -57,6 +64,47 @@ async function navigate(nextInput = browserInput.value) {
   }
 }
 
+async function handleBrowserInteraction(interaction: GeneratedAppInteractionEvent) {
+  const context = browserContext.value;
+
+  if (!context) {
+    return;
+  }
+
+  const requestId = windowStore.startWindowLoading(props.windowId);
+
+  if (requestId === null) {
+    return;
+  }
+
+  try {
+    const response = await browserInteract({
+      currentUrl: context.currentUrl,
+      currentSummary: context.currentSummary,
+      currentHtml: context.currentHtml,
+      userAction: interaction.userAction,
+      formValues: interaction.formValues,
+    });
+
+    if (!windowStore.isWindowRequestCurrent(props.windowId, requestId)) {
+      return;
+    }
+
+    windowStore.applyBrowserPageInteractionResponse(
+      props.windowId,
+      response,
+      summarizeInteraction(interaction.userAction),
+      requestId,
+    );
+    windowStore.finishWindowLoading(props.windowId, requestId);
+  } catch (error) {
+    const message =
+      error instanceof LlmApiError ? error.message : '浏览器页面交互暂时不可用，请稍后重试。';
+
+    windowStore.failWindowOperation(props.windowId, message, requestId);
+  }
+}
+
 watch(
   () => props.retryToken,
   () => {
@@ -89,9 +137,10 @@ watch(
     </div>
     <HtmlSandboxView
       v-if="browserHtml"
-      :enable-interaction-bridge="false"
       :html="browserHtml"
+      interaction-bridge-mode="browser"
       :title="pageTitle"
+      @interact="handleBrowserInteraction"
     />
   </section>
 </template>

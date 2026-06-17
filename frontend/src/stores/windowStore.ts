@@ -412,6 +412,38 @@ export const useWindowStore = defineStore('window', () => {
     window.title = response.pageTitle;
   }
 
+  function applyBrowserPageInteractionResponse(
+    windowId: string,
+    response: BrowserNavigateResponse,
+    interactionSummary: string,
+    requestId?: number,
+  ) {
+    const window = getWindow(windowId);
+
+    if (!window || window.appId !== 'browser' || window.content.kind !== 'builtin' || !isWindowRequestCurrent(windowId, requestId)) {
+      return;
+    }
+
+    const payload = getBrowserPayload(windowId);
+
+    if (!payload) {
+      return;
+    }
+
+    payload.pageTitle = response.pageTitle;
+    payload.url = response.url;
+    payload.html = response.html;
+    payload.summary = response.summary;
+    payload.context.currentUrl = response.url;
+    payload.context.currentHtml = response.html;
+    payload.context.currentSummary = response.summary;
+    payload.context.recentInteractionSummaries = [
+      ...payload.context.recentInteractionSummaries,
+      interactionSummary,
+    ].slice(-MAX_RECENT_INTERACTION_SUMMARIES);
+    window.title = response.pageTitle;
+  }
+
   function closeWindow(windowId: string) {
     clearLoadingTextTimer(windowId);
     windows.value = windows.value.filter((window) => window.id !== windowId);
@@ -560,6 +592,7 @@ export const useWindowStore = defineStore('window', () => {
 
   return {
     activeWindowId,
+    applyBrowserPageInteractionResponse,
     applyGeneratedAppInteractionResponse,
     closeWindow,
     failWindowOperation,

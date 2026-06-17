@@ -68,4 +68,50 @@ describe('browser windows', () => {
     expect(secondPayload.context.currentHtml).toBe('');
     expect(secondPayload.context.currentSummary).toBe('');
   });
+
+  it('updates only the interacted browser window context after page interaction', () => {
+    const store = useWindowStore();
+    const firstWindowId = store.openWindow('browser');
+    const secondWindowId = store.openWindow('browser');
+
+    store.setBrowserPageContent(firstWindowId, {
+      pageTitle: '第一页',
+      url: 'https://example.com/first',
+      html: '<main><a href="/next">下一页</a></main>',
+      summary: '第一页摘要。',
+    });
+    store.setBrowserPageContent(secondWindowId, {
+      pageTitle: '第二页',
+      url: 'https://example.com/second',
+      html: '<main><a href="/other">其他页</a></main>',
+      summary: '第二页摘要。',
+    });
+
+    store.applyBrowserPageInteractionResponse(
+      firstWindowId,
+      {
+        pageTitle: '下一页',
+        url: 'https://example.com/next',
+        html: '<main><h1>下一页</h1></main>',
+        summary: '下一页摘要。',
+      },
+      'link a "下一页"',
+    );
+
+    const firstWindow = store.windows.find((window) => window.id === firstWindowId);
+    const secondWindow = store.windows.find((window) => window.id === secondWindowId);
+    const firstPayload = firstWindow?.content.payload as BrowserWindowPayload;
+    const secondPayload = secondWindow?.content.payload as BrowserWindowPayload;
+
+    expect(firstWindow?.title).toBe('下一页');
+    expect(firstPayload.context.currentUrl).toBe('https://example.com/next');
+    expect(firstPayload.context.currentHtml).toBe('<main><h1>下一页</h1></main>');
+    expect(firstPayload.context.currentSummary).toBe('下一页摘要。');
+    expect(firstPayload.context.recentInteractionSummaries).toEqual(['link a "下一页"']);
+    expect(secondWindow?.title).toBe('第二页');
+    expect(secondPayload.context.currentUrl).toBe('https://example.com/second');
+    expect(secondPayload.context.currentHtml).toBe('<main><a href="/other">其他页</a></main>');
+    expect(secondPayload.context.currentSummary).toBe('第二页摘要。');
+    expect(secondPayload.context.recentInteractionSummaries).toEqual([]);
+  });
 });

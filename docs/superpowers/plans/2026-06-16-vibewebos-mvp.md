@@ -487,16 +487,16 @@
 - Modify: `frontend/src/components/generated/HtmlSandboxView.vue`
 - Modify: `frontend/src/api/llmApi.ts`
 
-- [ ] Capture clicks on links inside browser page content.
-- [ ] Capture form submissions inside browser page content.
-- [ ] Call `POST /api/browser-interact` with current URL, summary, HTML, user action, and redacted form values.
-- [ ] Build `POST /api/browser-interact` payload only from the current browser window context.
-- [ ] Append only a short interaction summary to that browser window's recent interaction summaries after success.
-- [ ] Never include another window's HTML, summary, URL, form values, or interaction summaries in the request.
-- [ ] Update current browser page title, URL, HTML, and summary on success.
-- [ ] Show retryable error inside the browser window on failure.
-- [ ] Ensure browser pages do not display “AI 生成” or “模拟内容” labels.
-- [ ] Commit as `feat: handle browser page interactions`.
+- [x] Capture clicks on links inside browser page content.
+- [x] Capture form submissions inside browser page content.
+- [x] Call `POST /api/browser-interact` with current URL, summary, HTML, user action, and redacted form values.
+- [x] Build `POST /api/browser-interact` payload only from the current browser window context.
+- [x] Append only a short interaction summary to that browser window's recent interaction summaries after success.
+- [x] Never include another window's HTML, summary, URL, form values, or interaction summaries in the request.
+- [x] Update current browser page title, URL, HTML, and summary on success.
+- [x] Show retryable error inside the browser window on failure.
+- [x] Ensure browser pages do not display “AI 生成” or “模拟内容” labels.
+- [x] Commit as `feat: handle browser page interactions`.
 
 **Acceptance:**
 - Browser links and forms produce simulated next pages.
