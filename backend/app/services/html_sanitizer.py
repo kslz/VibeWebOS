@@ -41,7 +41,7 @@ DISALLOWED_SCRIPT_PATTERNS = {
     "download_api": re.compile(r"\bdownload\s*=", re.IGNORECASE),
     "parent_window": re.compile(r"\b(window\s*\.\s*)?(parent|top|opener)\b", re.IGNORECASE),
     "module_import": re.compile(r"\bimport\s*(?:\(|[\w{*])", re.IGNORECASE),
-    "dynamic_code": re.compile(r"\b(eval|Function)\s*\(", re.IGNORECASE),
+    "dynamic_code": re.compile(r"\beval\s*\(|\b(?:new\s+)?Function\s*\("),
     "document_write": re.compile(r"\bdocument\s*\.\s*write\s*\(", re.IGNORECASE),
 }
 

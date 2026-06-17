@@ -50,6 +50,25 @@ def test_preserves_safe_inline_script_for_local_generated_app_logic() -> None:
     assert "fetch(" not in sanitized
 
 
+def test_preserves_safe_inline_script_with_function_callback() -> None:
+    html = """
+    <section>
+      <button id="add" type="button">+1</button>
+      <script>
+        const add = document.querySelector('#add');
+        add.addEventListener('click', function () {
+          add.textContent = '+2';
+        });
+      </script>
+    </section>
+    """
+
+    sanitized = sanitize_html(html)
+
+    assert "function ()" in sanitized
+    assert "addEventListener" in sanitized
+
+
 @pytest.mark.parametrize(
     "html",
     [
@@ -86,6 +105,9 @@ def test_rejects_unsafe_html(html: str) -> None:
         "opener.location = 'https://example.com'",
         "import value from 'https://example.com/app.js'",
         "import('https://example.com/app.js')",
+        "Function('return window')()",
+        "new Function('return window')",
+        "eval('window')",
     ],
 )
 def test_rejects_dangerous_inline_script_capabilities(script: str) -> None:
