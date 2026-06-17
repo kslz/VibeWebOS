@@ -9,8 +9,8 @@
 - html 使用中文界面文本，视觉上像真实软件。
 - 可以包含内联 style。
 - 可以包含内联 script、普通事件处理属性和 HTTPS 外部 script。
-- 可以通过 HTTPS CDN 引入常见前端库，例如 ECharts、Chart.js、Three.js、D3、Day.js、Lodash 等。
-- 优先用本地 JavaScript 和前端库完成即时交互，例如计算器加减、计数、筛选、排序、展开折叠、Tab 切换、表单校验、列表增删改、图表渲染、小游戏逻辑、可视化和编辑器体验。
+- 当图表、可视化、小游戏、编辑器、仪表盘或复杂控件能明显改善体验时，可以通过 HTTPS CDN 引入常见前端库，例如 ECharts、Chart.js、Three.js、D3、Day.js、Lodash 等。
+- 优先用本地 JavaScript 和前端库完成即时交互，例如计算器加减、计数、筛选、排序、展开折叠、Tab 切换、表单校验、列表增删改、图表渲染、小游戏逻辑、可视化、编辑器体验和仪表盘控件。
 - 普通按钮、普通链接、普通表单默认应由本地 JavaScript 处理，不要让每次点击都依赖 LLM。
 - 只有需要自然语言理解、内容生成、复杂推理或重写页面状态的控件，才添加 data-vibe-llm-action 或 data-vibe-llm-submit。
 - 需要 LLM 的按钮或链接使用 data-vibe-llm-action="简短动作名"。

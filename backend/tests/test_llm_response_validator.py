@@ -2,8 +2,10 @@ import pytest
 
 from app.services.llm_response_validator import (
     LlmResponseValidationError,
+    validate_app_interact_response,
     validate_app_generate_response,
     validate_app_search_response,
+    validate_browser_interact_response,
     validate_browser_response,
 )
 
@@ -107,6 +109,23 @@ def test_rejects_parent_window_escape_in_generated_app_response() -> None:
         )
 
 
+def test_accepts_open_runtime_capabilities_in_generated_app_interact_response() -> None:
+    response = validate_app_interact_response(
+        """
+        {
+          "windowTitle": "Editor",
+          "html": "<section><textarea oninput=\\"localStorage.setItem('draft', this.value)\\"></textarea><script src=\\"https://cdn.jsdelivr.net/npm/lodash/lodash.min.js\\"></script><script>fetch('https://api.example.com/templates.json');</script></section>",
+          "summary": "An editor app using CDN and local browser state."
+        }
+        """
+    )
+
+    assert "cdn.jsdelivr.net" in response.html
+    assert "oninput" in response.html
+    assert "localStorage" in response.html
+    assert "fetch" in response.html
+
+
 def test_rejects_inline_script_in_browser_response() -> None:
     with pytest.raises(LlmResponseValidationError):
         validate_browser_response(
@@ -115,6 +134,20 @@ def test_rejects_inline_script_in_browser_response() -> None:
               "pageTitle": "Browser",
               "url": "https://example.com",
               "html": "<section><script>const x = 1;</script></section>",
+              "summary": "Browser page."
+            }
+            """
+        )
+
+
+def test_rejects_inline_script_in_browser_interact_response() -> None:
+    with pytest.raises(LlmResponseValidationError):
+        validate_browser_interact_response(
+            """
+            {
+              "pageTitle": "Browser",
+              "url": "https://example.com/next",
+              "html": "<section><button onclick=\\"bad()\\">Bad</button></section>",
               "summary": "Browser page."
             }
             """
