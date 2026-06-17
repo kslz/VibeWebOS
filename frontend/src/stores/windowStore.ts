@@ -2,7 +2,8 @@ import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 
 import { systemConfig } from '@/config/systemConfig';
-import type { BuiltInAppId } from '@/types/app';
+import type { BuiltInAppId, GeneratedAppCandidate } from '@/types/app';
+import type { AppGenerateResponse, GeneratedAppWindowPayload } from '@/types/llm';
 import type { WindowBounds, WindowState } from '@/types/window';
 
 const INITIAL_Z_INDEX = 20;
@@ -249,6 +250,85 @@ export const useWindowStore = defineStore('window', () => {
     return windowId;
   }
 
+  function createGeneratedAppPayload(candidate: GeneratedAppCandidate): GeneratedAppWindowPayload {
+    return {
+      candidate,
+      html: '',
+      summary: '',
+      context: {
+        currentHtml: '',
+        currentSummary: '',
+        temporaryFormValues: {},
+        recentInteractionSummaries: [],
+      },
+    };
+  }
+
+  function openGeneratedAppWindow(candidate: GeneratedAppCandidate) {
+    const index = windows.value.length;
+    const generatedAppId = `generated:${candidate.id ?? nextWindowNumber.value}` as const;
+    const windowId = `window-${nextWindowNumber.value}`;
+
+    nextWindowNumber.value += 1;
+    nextZIndex.value += 1;
+
+    windows.value.push({
+      id: windowId,
+      appId: generatedAppId,
+      title: candidate.name,
+      x: 172 + (index % 6) * WINDOW_OFFSET,
+      y: 104 + (index % 5) * WINDOW_OFFSET,
+      width: 760,
+      height: 520,
+      zIndex: nextZIndex.value,
+      minimized: false,
+      maximized: false,
+      loading: false,
+      loadingText: null,
+      loadingTextKey: 0,
+      error: null,
+      retryToken: 0,
+      requestSequence: 0,
+      activeRequestId: null,
+      content: {
+        kind: 'generatedHtml',
+        payload: createGeneratedAppPayload(candidate),
+      },
+    });
+
+    activeWindowId.value = windowId;
+    return windowId;
+  }
+
+  function getGeneratedAppPayload(windowId: string) {
+    const window = getWindow(windowId);
+
+    if (window?.content.kind !== 'generatedHtml') {
+      return null;
+    }
+
+    return window.content.payload as GeneratedAppWindowPayload;
+  }
+
+  function setGeneratedAppContent(
+    windowId: string,
+    response: AppGenerateResponse,
+    requestId?: number,
+  ) {
+    const window = getWindow(windowId);
+
+    if (!window || window.content.kind !== 'generatedHtml' || !isWindowRequestCurrent(windowId, requestId)) {
+      return;
+    }
+
+    const payload = window.content.payload as GeneratedAppWindowPayload;
+    payload.html = response.html;
+    payload.summary = response.summary;
+    payload.context.currentHtml = response.html;
+    payload.context.currentSummary = response.summary;
+    window.title = response.windowTitle;
+  }
+
   function closeWindow(windowId: string) {
     clearLoadingTextTimer(windowId);
     windows.value = windows.value.filter((window) => window.id !== windowId);
@@ -405,12 +485,14 @@ export const useWindowStore = defineStore('window', () => {
     minimizeWindow,
     moveWindow,
     openWindow,
+    openGeneratedAppWindow,
     openWindows,
     resizeWindow,
     restoreMaximizedWindow,
     restoreWindow,
     isWindowRequestCurrent,
     retryWindowOperation,
+    setGeneratedAppContent,
     startWindowLoading,
     toggleWindowFromTaskbar,
     toggleMaximizeWindow,

@@ -4,6 +4,10 @@ import type { GeneratedAppCandidate } from '@/types/app';
 defineProps<{
   results: GeneratedAppCandidate[];
 }>();
+
+defineEmits<{
+  select: [candidate: GeneratedAppCandidate];
+}>();
 </script>
 
 <template>
@@ -12,19 +16,21 @@ defineProps<{
       输入需求后，这里会显示 2 到 3 个候选应用。
     </p>
     <ul v-else class="search-result-list__items">
-      <li v-for="result in results" :key="result.id || result.name" class="search-result-list__item">
-        <strong>{{ result.name }}</strong>
-        <span>{{ result.description }}</span>
-        <dl class="search-result-list__meta">
-          <div class="search-result-list__meta-item">
-            <dt>类型</dt>
-            <dd>{{ result.appType }}</dd>
-          </div>
-          <div class="search-result-list__meta-item">
-            <dt>风格</dt>
-            <dd>{{ result.styleHint }}</dd>
-          </div>
-        </dl>
+      <li v-for="result in results" :key="result.id || result.name">
+        <button class="search-result-list__item" type="button" @click="$emit('select', result)">
+          <strong>{{ result.name }}</strong>
+          <span>{{ result.description }}</span>
+          <dl class="search-result-list__meta">
+            <div class="search-result-list__meta-item">
+              <dt>类型</dt>
+              <dd>{{ result.appType }}</dd>
+            </div>
+            <div class="search-result-list__meta-item">
+              <dt>风格</dt>
+              <dd>{{ result.styleHint }}</dd>
+            </div>
+          </dl>
+        </button>
       </li>
     </ul>
   </section>
@@ -57,11 +63,21 @@ defineProps<{
 
 .search-result-list__item {
   display: grid;
+  width: 100%;
   gap: 4px;
   padding: 12px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
+  color: inherit;
+  text-align: left;
   background: var(--color-panel-bg);
+  cursor: pointer;
+}
+
+.search-result-list__item:hover,
+.search-result-list__item:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
 }
 
 .search-result-list__item strong {

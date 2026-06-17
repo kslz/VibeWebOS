@@ -4,12 +4,15 @@ import { computed, onBeforeUnmount } from 'vue';
 import AppSearch from '@/apps/AppSearch/AppSearch.vue';
 import AboutApp from '@/apps/AboutApp/AboutApp.vue';
 import BrowserApp from '@/apps/BrowserApp/BrowserApp.vue';
+import { appGenerate, LlmApiError } from '@/api/llmApi';
+import HtmlSandboxView from '@/components/generated/HtmlSandboxView.vue';
 import SettingsApp from '@/apps/SettingsApp/SettingsApp.vue';
 import WindowLoadingOverlay from '@/components/loading/WindowLoadingOverlay.vue';
 import WindowResizeHandle from '@/components/window/WindowResizeHandle.vue';
 import WindowTitleBar from '@/components/window/WindowTitleBar.vue';
 import { useWindowStore } from '@/stores/windowStore';
 import type { BuiltInAppId } from '@/types/app';
+import type { GeneratedAppWindowPayload } from '@/types/llm';
 import type { WindowBounds, WindowResizeDirection, WindowState } from '@/types/window';
 
 const props = defineProps<{
@@ -51,7 +54,50 @@ const builtInComponent = computed(() => {
   return builtInApps[props.window.appId as BuiltInAppId] ?? null;
 });
 
+const generatedAppPayload = computed(() => {
+  if (props.window.content.kind !== 'generatedHtml') {
+    return null;
+  }
+
+  return props.window.content.payload as GeneratedAppWindowPayload;
+});
+
 const loadingText = computed(() => props.window.loadingText ?? '正在准备窗口内容...');
+
+async function retryWindowError() {
+  const generatedPayload = generatedAppPayload.value;
+
+  if (!generatedPayload) {
+    windowStore.retryWindowOperation(props.window.id);
+    return;
+  }
+
+  if (props.window.loading) {
+    return;
+  }
+
+  const requestId = windowStore.startWindowLoading(props.window.id);
+
+  if (requestId === null) {
+    return;
+  }
+
+  try {
+    const response = await appGenerate(generatedPayload.candidate);
+
+    if (!windowStore.isWindowRequestCurrent(props.window.id, requestId)) {
+      return;
+    }
+
+    windowStore.setGeneratedAppContent(props.window.id, response, requestId);
+    windowStore.finishWindowLoading(props.window.id, requestId);
+  } catch (error) {
+    const message =
+      error instanceof LlmApiError ? error.message : '应用生成暂时不可用，请稍后重试。';
+
+    windowStore.failWindowOperation(props.window.id, message, requestId);
+  }
+}
 
 let stopPointerInteraction: (() => void) | null = null;
 
@@ -197,11 +243,16 @@ onBeforeUnmount(() => {
           :retry-token="window.retryToken"
           :window-id="window.id"
         />
+        <HtmlSandboxView
+          v-else-if="generatedAppPayload"
+          :html="generatedAppPayload.html"
+          :title="window.title"
+        />
         <div v-else class="app-window__placeholder">窗口内容暂未接入。</div>
       </div>
       <div v-if="window.error" class="app-window__error" role="alert">
         <span>{{ window.error }}</span>
-        <button class="app-window__retry" type="button" @click="windowStore.retryWindowOperation(window.id)">
+        <button class="app-window__retry" type="button" @click="retryWindowError">
           重试
         </button>
       </div>

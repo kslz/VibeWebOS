@@ -11,6 +11,20 @@ export interface UserAction {
 
 export type FormValues = Record<string, string>;
 
+export interface WindowLevelLlmContext {
+  currentHtml: string;
+  currentSummary: string;
+  temporaryFormValues: FormValues;
+  recentInteractionSummaries: string[];
+}
+
+export interface GeneratedAppWindowPayload {
+  candidate: GeneratedAppCandidate;
+  html: string;
+  summary: string;
+  context: WindowLevelLlmContext;
+}
+
 export interface AppSearchRequest {
   query: string;
 }

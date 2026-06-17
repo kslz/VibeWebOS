@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 
-import { appSearch, LlmApiError } from '@/api/llmApi';
+import { appGenerate, appSearch, LlmApiError } from '@/api/llmApi';
 import SearchResultList from '@/apps/AppSearch/SearchResultList.vue';
 import { useWindowStore } from '@/stores/windowStore';
 import type { GeneratedAppCandidate } from '@/types/app';
@@ -56,6 +56,31 @@ async function submitSearch(nextQuery = query.value) {
   }
 }
 
+async function generateApp(candidate: GeneratedAppCandidate) {
+  const windowId = windowStore.openGeneratedAppWindow(candidate);
+  const requestId = windowStore.startWindowLoading(windowId);
+
+  if (requestId === null) {
+    return;
+  }
+
+  try {
+    const response = await appGenerate(candidate);
+
+    if (!windowStore.isWindowRequestCurrent(windowId, requestId)) {
+      return;
+    }
+
+    windowStore.setGeneratedAppContent(windowId, response, requestId);
+    windowStore.finishWindowLoading(windowId, requestId);
+  } catch (error) {
+    const message =
+      error instanceof LlmApiError ? error.message : '应用生成暂时不可用，请稍后重试。';
+
+    windowStore.failWindowOperation(windowId, message, requestId);
+  }
+}
+
 watch(
   () => props.retryToken,
   () => {
@@ -86,7 +111,7 @@ watch(
         <button class="app-search__button" type="submit" :disabled="isSearching">搜索</button>
       </div>
     </form>
-    <SearchResultList :results="results" />
+    <SearchResultList :results="results" @select="generateApp" />
   </section>
 </template>
 
