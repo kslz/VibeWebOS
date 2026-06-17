@@ -11,6 +11,7 @@ class Settings(BaseSettings):
         default="https://api.deepseek.com",
         alias="DEEPSEEK_BASE_URL",
     )
+    deepseek_model: str = Field(default="deepseek-chat", alias="DEEPSEEK_MODEL")
     request_timeout_seconds: float = Field(default=30.0, alias="REQUEST_TIMEOUT_SECONDS")
     max_html_length: int = Field(default=80000, alias="MAX_HTML_LENGTH")
 
