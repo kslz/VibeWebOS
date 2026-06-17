@@ -94,7 +94,7 @@ describe('generated interaction bridge', () => {
         type: 'vibewebos:generated-interaction',
         formValues: {
           title: 'Roadmap',
-          password: '[redacted password]',
+          password: '用户输入了密码',
         },
         userAction: expect.objectContaining({
           type: 'submit',
@@ -227,6 +227,33 @@ describe('browser interaction bridge', () => {
           type: 'submit',
           targetTag: 'form',
         }),
+      }),
+      '*',
+    );
+  });
+
+  it('keeps maskable browser values available for parent-window redaction summaries', () => {
+    document.body.innerHTML = `
+      <form action="/pay">
+        <input name="bankCard" value="6222021234567890123" />
+        <input name="phone" value="13800138000" />
+        <input name="password" type="password" value="secret" />
+        <button type="submit">提交</button>
+      </form>
+    `;
+    const postMessage = vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {});
+
+    installBrowserBridge();
+    document.querySelector('form')?.dispatchEvent(new SubmitEvent('submit', { bubbles: true }));
+
+    expect(postMessage).toHaveBeenCalledTimes(1);
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        formValues: {
+          bankCard: '6222021234567890123',
+          phone: '13800138000',
+          password: '用户输入了密码',
+        },
       }),
       '*',
     );

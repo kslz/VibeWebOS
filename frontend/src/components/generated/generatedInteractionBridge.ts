@@ -58,16 +58,25 @@ export function buildGeneratedInteractionBridgeScript(
     var type = String(control.getAttribute('type') || '').toLowerCase();
     var value = String(control.value || '');
 
-    if (type === 'password' || key.indexOf('password') !== -1 || key.indexOf('pwd') !== -1) {
-      return '[redacted password]';
+    if (
+      (key.indexOf('payment') !== -1 || key.indexOf('pay') !== -1 || key.indexOf('支付') !== -1) &&
+      (type === 'password' || key.indexOf('password') !== -1 || key.indexOf('pwd') !== -1 || key.indexOf('密码') !== -1)
+    ) {
+      return '用户输入了支付密码';
     }
 
-    if (key.indexOf('code') !== -1 || key.indexOf('otp') !== -1 || key.indexOf('verification') !== -1) {
-      return '[redacted verification code]';
+    if (type === 'password' || key.indexOf('password') !== -1 || key.indexOf('pwd') !== -1 || key.indexOf('密码') !== -1) {
+      return '用户输入了密码';
     }
 
-    if (key.indexOf('card') !== -1 || key.indexOf('phone') !== -1 || key.indexOf('id') !== -1) {
-      return value ? '[redacted sensitive value]' : '';
+    if (
+      key.indexOf('code') !== -1 ||
+      key.indexOf('otp') !== -1 ||
+      key.indexOf('verification') !== -1 ||
+      key.indexOf('验证码') !== -1 ||
+      key.indexOf('校验码') !== -1
+    ) {
+      return '用户输入了验证码';
     }
 
     return value;
@@ -215,16 +224,25 @@ export function buildBrowserInteractionBridgeScript(
     var type = String(control.getAttribute('type') || '').toLowerCase();
     var value = String(control.value || '');
 
-    if (type === 'password' || key.indexOf('password') !== -1 || key.indexOf('pwd') !== -1) {
-      return '[redacted password]';
+    if (
+      (key.indexOf('payment') !== -1 || key.indexOf('pay') !== -1 || key.indexOf('支付') !== -1) &&
+      (type === 'password' || key.indexOf('password') !== -1 || key.indexOf('pwd') !== -1 || key.indexOf('密码') !== -1)
+    ) {
+      return '用户输入了支付密码';
     }
 
-    if (key.indexOf('code') !== -1 || key.indexOf('otp') !== -1 || key.indexOf('verification') !== -1) {
-      return '[redacted verification code]';
+    if (type === 'password' || key.indexOf('password') !== -1 || key.indexOf('pwd') !== -1 || key.indexOf('密码') !== -1) {
+      return '用户输入了密码';
     }
 
-    if (key.indexOf('card') !== -1 || key.indexOf('phone') !== -1 || key.indexOf('id') !== -1) {
-      return value ? '[redacted sensitive value]' : '';
+    if (
+      key.indexOf('code') !== -1 ||
+      key.indexOf('otp') !== -1 ||
+      key.indexOf('verification') !== -1 ||
+      key.indexOf('验证码') !== -1 ||
+      key.indexOf('校验码') !== -1
+    ) {
+      return '用户输入了验证码';
     }
 
     return value;

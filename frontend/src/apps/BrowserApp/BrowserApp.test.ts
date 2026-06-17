@@ -13,6 +13,8 @@ describe('BrowserApp', () => {
     expect(source).toContain("currentSummary: context?.currentSummary ?? ''");
     expect(source).toContain('windowStore.setBrowserPageContent');
     expect(source).toContain('browserInteract');
+    expect(source).toContain('redactFormValues');
+    expect(source).toContain('formValues: redactFormValues(interaction.formValues)');
     expect(source).toContain('windowStore.applyBrowserPageInteractionResponse');
     expect(source).toContain('handleBrowserInteraction');
     expect(source).toContain('<HtmlSandboxView');

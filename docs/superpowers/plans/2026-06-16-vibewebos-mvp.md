@@ -511,16 +511,16 @@
 - Modify: `frontend/src/components/generated/generatedInteractionBridge.ts`
 - Modify: `frontend/src/apps/BrowserApp/BrowserApp.vue`
 
-- [ ] Redact password fields as `用户输入了密码`.
-- [ ] Redact payment password fields as `用户输入了支付密码`.
-- [ ] Redact verification code fields as `用户输入了验证码`.
-- [ ] Redact bank card, ID card, and phone values into masked summaries.
-- [ ] Preserve normal search terms, normal text fields, addresses, normal form values, and payment amount.
-- [ ] Add tests covering password, payment password, verification code, bank card, ID card, phone, email, and normal text.
-- [ ] Use redaction before marked app interaction requests and browser interaction requests.
-- [ ] Confirm generated app form values are collected only for marked LLM submit actions, not ordinary local form submissions.
-- [ ] Document that generated apps may still send their own network requests in the toy runtime; redaction protects only VibeWebOS-to-LLM payloads.
-- [ ] Commit as `feat: redact sensitive llm form values`.
+- [x] Redact password fields as `用户输入了密码`.
+- [x] Redact payment password fields as `用户输入了支付密码`.
+- [x] Redact verification code fields as `用户输入了验证码`.
+- [x] Redact bank card, ID card, and phone values into masked summaries.
+- [x] Preserve normal search terms, normal text fields, addresses, normal form values, and payment amount.
+- [x] Add tests covering password, payment password, verification code, bank card, ID card, phone, email, and normal text.
+- [x] Use redaction before marked app interaction requests and browser interaction requests.
+- [x] Confirm generated app form values are collected only for marked LLM submit actions, not ordinary local form submissions.
+- [x] Document that generated apps may still send their own network requests in the toy runtime; redaction protects only VibeWebOS-to-LLM payloads.
+- [x] Commit as `feat: redact sensitive llm form values`.
 
 **Acceptance:**
 - Raw sensitive values are not sent to backend from marked generated app submissions or browser page submissions.

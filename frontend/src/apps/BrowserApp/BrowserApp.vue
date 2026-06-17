@@ -6,6 +6,7 @@ import HtmlSandboxView from '@/components/generated/HtmlSandboxView.vue';
 import { systemConfig } from '@/config/systemConfig';
 import { useWindowStore } from '@/stores/windowStore';
 import type { GeneratedAppInteractionEvent, UserAction } from '@/types/llm';
+import { redactFormValues } from '@/utils/redactFormValues';
 
 const props = defineProps<{
   retryToken: number;
@@ -83,7 +84,7 @@ async function handleBrowserInteraction(interaction: GeneratedAppInteractionEven
       currentSummary: context.currentSummary,
       currentHtml: context.currentHtml,
       userAction: interaction.userAction,
-      formValues: interaction.formValues,
+      formValues: redactFormValues(interaction.formValues),
     });
 
     if (!windowStore.isWindowRequestCurrent(props.windowId, requestId)) {

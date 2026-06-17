@@ -14,6 +14,7 @@ import { useWindowStore } from '@/stores/windowStore';
 import type { BuiltInAppId } from '@/types/app';
 import type { GeneratedAppInteractionEvent, GeneratedAppWindowPayload, UserAction } from '@/types/llm';
 import type { WindowBounds, WindowResizeDirection, WindowState } from '@/types/window';
+import { redactFormValues } from '@/utils/redactFormValues';
 
 const props = defineProps<{
   active: boolean;
@@ -125,7 +126,7 @@ async function handleGeneratedInteraction(interaction: GeneratedAppInteractionEv
       currentSummary: context.currentSummary,
       currentHtml: context.currentHtml,
       userAction: interaction.userAction,
-      formValues: interaction.formValues,
+      formValues: redactFormValues(interaction.formValues),
     });
 
     if (!windowStore.isWindowRequestCurrent(props.window.id, requestId)) {
