@@ -60,3 +60,32 @@ def test_returns_sanitized_typed_response() -> None:
 
     assert response.page_title == "Example"
     assert "<section>" in response.html
+
+
+def test_accepts_safe_inline_script_in_generated_app_response() -> None:
+    response = validate_app_generate_response(
+        """
+        {
+          "windowTitle": "Counter",
+          "html": "<section><output id=\\"total\\">0</output><button id=\\"add\\" type=\\"button\\">+1</button><script>const total = document.querySelector('#total'); const add = document.querySelector('#add'); let count = 0; add.addEventListener('click', () => { count += 1; total.textContent = String(count); });</script></section>",
+          "summary": "A counter app with local increment logic."
+        }
+        """
+    )
+
+    assert "<script>" in response.html
+    assert "addEventListener" in response.html
+
+
+def test_rejects_inline_script_in_browser_response() -> None:
+    with pytest.raises(LlmResponseValidationError):
+        validate_browser_response(
+            """
+            {
+              "pageTitle": "Browser",
+              "url": "https://example.com",
+              "html": "<section><script>const x = 1;</script></section>",
+              "summary": "Browser page."
+            }
+            """
+        )

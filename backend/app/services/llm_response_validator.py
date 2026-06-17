@@ -29,7 +29,12 @@ def validate_app_generate_response(
     *,
     max_html_length: int | None = None,
 ) -> AppGenerateResponse:
-    return _validate_html_response(raw_output, AppGenerateResponse, max_html_length=max_html_length)
+    return _validate_html_response(
+        raw_output,
+        AppGenerateResponse,
+        max_html_length=max_html_length,
+        allow_inline_script=True,
+    )
 
 
 def validate_app_interact_response(
@@ -37,7 +42,12 @@ def validate_app_interact_response(
     *,
     max_html_length: int | None = None,
 ) -> AppInteractResponse:
-    return _validate_html_response(raw_output, AppInteractResponse, max_html_length=max_html_length)
+    return _validate_html_response(
+        raw_output,
+        AppInteractResponse,
+        max_html_length=max_html_length,
+        allow_inline_script=True,
+    )
 
 
 def validate_browser_response(
@@ -45,7 +55,12 @@ def validate_browser_response(
     *,
     max_html_length: int | None = None,
 ) -> BrowserNavigateResponse:
-    return _validate_html_response(raw_output, BrowserNavigateResponse, max_html_length=max_html_length)
+    return _validate_html_response(
+        raw_output,
+        BrowserNavigateResponse,
+        max_html_length=max_html_length,
+        allow_inline_script=False,
+    )
 
 
 def validate_browser_interact_response(
@@ -53,7 +68,12 @@ def validate_browser_interact_response(
     *,
     max_html_length: int | None = None,
 ) -> BrowserInteractResponse:
-    return _validate_html_response(raw_output, BrowserInteractResponse, max_html_length=max_html_length)
+    return _validate_html_response(
+        raw_output,
+        BrowserInteractResponse,
+        max_html_length=max_html_length,
+        allow_inline_script=False,
+    )
 
 
 def _validate_json_model(raw_output: str, model_type: type[ResponseModel]) -> ResponseModel:
@@ -70,6 +90,7 @@ def _validate_html_response(
     model_type: type[ResponseModel],
     *,
     max_html_length: int | None,
+    allow_inline_script: bool,
 ) -> ResponseModel:
     response = _validate_json_model(raw_output, model_type)
     html = getattr(response, "html", None)
@@ -80,7 +101,7 @@ def _validate_html_response(
     _validate_html_length(html, max_html_length)
 
     try:
-        sanitized_html = sanitize_html(html)
+        sanitized_html = sanitize_html(html, allow_inline_script=allow_inline_script)
     except HtmlSanitizationError as exc:
         raise LlmResponseValidationError(str(exc)) from exc
 

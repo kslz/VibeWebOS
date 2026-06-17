@@ -26,10 +26,33 @@ def test_preserves_safe_rich_html() -> None:
     assert "onclick" not in sanitized
 
 
+def test_preserves_safe_inline_script_for_local_generated_app_logic() -> None:
+    html = """
+    <section>
+      <output id="total">0</output>
+      <button id="add" type="button">+1</button>
+      <script>
+        const total = document.querySelector('#total');
+        const add = document.querySelector('#add');
+        let count = 0;
+        add.addEventListener('click', () => {
+          count += 1;
+          total.textContent = String(count);
+        });
+      </script>
+    </section>
+    """
+
+    sanitized = sanitize_html(html)
+
+    assert "<script>" in sanitized
+    assert "addEventListener" in sanitized
+    assert "fetch(" not in sanitized
+
+
 @pytest.mark.parametrize(
     "html",
     [
-        "<script>alert(1)</script>",
         "<iframe src='https://example.com'></iframe>",
         "<button onclick='steal()'>点我</button>",
         "<a href='javascript:alert(1)'>坏链接</a>",
@@ -42,3 +65,29 @@ def test_preserves_safe_rich_html() -> None:
 def test_rejects_unsafe_html(html: str) -> None:
     with pytest.raises(HtmlSanitizationError):
         sanitize_html(html)
+
+
+@pytest.mark.parametrize(
+    "script",
+    [
+        "fetch('/api/private')",
+        "new XMLHttpRequest()",
+        "new WebSocket('wss://example.com')",
+        "new EventSource('/stream')",
+        "localStorage.setItem('x', '1')",
+        "sessionStorage.getItem('x')",
+        "indexedDB.open('x')",
+        "document.cookie = 'x=1'",
+        "navigator.clipboard.writeText('x')",
+        "navigator.mediaDevices.getUserMedia({ audio: true })",
+        "navigator.geolocation.getCurrentPosition(() => {})",
+        "window.parent.document.body",
+        "window.top.location = 'https://example.com'",
+        "opener.location = 'https://example.com'",
+        "import value from 'https://example.com/app.js'",
+        "import('https://example.com/app.js')",
+    ],
+)
+def test_rejects_dangerous_inline_script_capabilities(script: str) -> None:
+    with pytest.raises(HtmlSanitizationError):
+        sanitize_html(f"<section><script>{script}</script></section>")

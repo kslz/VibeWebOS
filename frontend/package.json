@@ -20,6 +20,7 @@
     "vue-tsc": "^2.2.10"
   },
   "devDependencies": {
+    "happy-dom": "^20.10.5",
     "vitest": "^4.1.9"
   }
 }
