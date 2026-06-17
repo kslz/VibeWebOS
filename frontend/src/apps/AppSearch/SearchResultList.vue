@@ -15,6 +15,16 @@ defineProps<{
       <li v-for="result in results" :key="result.id || result.name" class="search-result-list__item">
         <strong>{{ result.name }}</strong>
         <span>{{ result.description }}</span>
+        <dl class="search-result-list__meta">
+          <div class="search-result-list__meta-item">
+            <dt>类型</dt>
+            <dd>{{ result.appType }}</dd>
+          </div>
+          <div class="search-result-list__meta-item">
+            <dt>风格</dt>
+            <dd>{{ result.styleHint }}</dd>
+          </div>
+        </dl>
       </li>
     </ul>
   </section>
@@ -62,5 +72,37 @@ defineProps<{
   color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.search-result-list__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 0;
+}
+
+.search-result-list__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.search-result-list__meta dt,
+.search-result-list__meta dd {
+  margin: 0;
+  font-size: 12px;
+}
+
+.search-result-list__meta dt {
+  color: var(--color-text-secondary);
+}
+
+.search-result-list__meta dd {
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 </style>

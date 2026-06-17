@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { appSearch, LlmApiError } from '@/api/llmApi';
 import SearchResultList from '@/apps/AppSearch/SearchResultList.vue';
@@ -15,8 +15,16 @@ const windowStore = useWindowStore();
 const query = ref('');
 const lastSubmittedQuery = ref('');
 const results = ref<GeneratedAppCandidate[]>([]);
+const currentWindow = computed(() =>
+  windowStore.windows.find((window) => window.id === props.windowId),
+);
+const isSearching = computed(() => Boolean(currentWindow.value?.loading));
 
 async function submitSearch(nextQuery = query.value) {
+  if (isSearching.value) {
+    return;
+  }
+
   const trimmedQuery = nextQuery.trim();
 
   if (!trimmedQuery) {
@@ -72,9 +80,10 @@ watch(
           v-model="query"
           class="app-search__input"
           type="search"
+          :disabled="isSearching"
           placeholder="例如：一个项目进度看板"
         />
-        <button class="app-search__button" type="submit">搜索</button>
+        <button class="app-search__button" type="submit" :disabled="isSearching">搜索</button>
       </div>
     </form>
     <SearchResultList :results="results" />

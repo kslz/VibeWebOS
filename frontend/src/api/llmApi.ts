@@ -31,12 +31,15 @@ async function readErrorResponse(response: Response) {
 
   try {
     const payload = (await response.json()) as Partial<FrontendApiError> & {
-      detail?: string;
+      detail?: string | Partial<FrontendApiError>;
     };
+    const detail = payload.detail;
+    const detailMessage = typeof detail === 'object' ? detail.message : detail;
+    const detailCode = typeof detail === 'object' ? detail.code : undefined;
 
     return {
-      code: payload.code,
-      message: payload.message ?? payload.detail ?? fallbackMessage,
+      code: payload.code ?? detailCode,
+      message: payload.message ?? detailMessage ?? fallbackMessage,
     };
   } catch {
     return {
