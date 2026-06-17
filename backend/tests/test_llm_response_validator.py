@@ -77,6 +77,36 @@ def test_accepts_safe_inline_script_in_generated_app_response() -> None:
     assert "addEventListener" in response.html
 
 
+def test_accepts_open_runtime_capabilities_in_generated_app_response() -> None:
+    response = validate_app_generate_response(
+        """
+        {
+          "windowTitle": "Chart",
+          "html": "<section><button onclick=\\"render()\\">刷新</button><canvas id=\\"chart\\"></canvas><script src=\\"https://cdn.jsdelivr.net/npm/chart.js\\"></script><script>localStorage.setItem('chart-mode', 'bar'); fetch('https://api.example.com/data.json');</script></section>",
+          "summary": "A chart app using CDN and browser-side state."
+        }
+        """
+    )
+
+    assert "cdn.jsdelivr.net" in response.html
+    assert "onclick" in response.html
+    assert "localStorage" in response.html
+    assert "fetch" in response.html
+
+
+def test_rejects_parent_window_escape_in_generated_app_response() -> None:
+    with pytest.raises(LlmResponseValidationError):
+        validate_app_generate_response(
+            """
+            {
+              "windowTitle": "Bad",
+              "html": "<section><script>window.parent.document.body.textContent = 'bad';</script></section>",
+              "summary": "Bad app."
+            }
+            """
+        )
+
+
 def test_rejects_inline_script_in_browser_response() -> None:
     with pytest.raises(LlmResponseValidationError):
         validate_browser_response(

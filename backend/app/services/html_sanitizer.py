@@ -32,17 +32,7 @@ SAFE_URL_PREFIXES = (
 )
 URL_SCHEME_PATTERN = re.compile(r"^[a-z][a-z0-9+.-]*:", re.IGNORECASE)
 DISALLOWED_SCRIPT_PATTERNS = {
-    "network_api": re.compile(r"\b(fetch|XMLHttpRequest|WebSocket|EventSource)\b", re.IGNORECASE),
-    "storage_api": re.compile(r"\b(localStorage|sessionStorage|indexedDB)\b", re.IGNORECASE),
-    "cookie_api": re.compile(r"\bdocument\s*\.\s*cookie\b", re.IGNORECASE),
-    "clipboard_api": re.compile(r"\bnavigator\s*\.\s*clipboard\b", re.IGNORECASE),
-    "media_api": re.compile(r"\bnavigator\s*\.\s*mediaDevices\b", re.IGNORECASE),
-    "location_api": re.compile(r"\bnavigator\s*\.\s*geolocation\b", re.IGNORECASE),
-    "download_api": re.compile(r"\bdownload\s*=", re.IGNORECASE),
     "parent_window": re.compile(r"\b(window\s*\.\s*)?(parent|top|opener)\b", re.IGNORECASE),
-    "module_import": re.compile(r"\bimport\s*(?:\(|[\w{*])", re.IGNORECASE),
-    "dynamic_code": re.compile(r"\beval\s*\(|\b(?:new\s+)?Function\s*\("),
-    "document_write": re.compile(r"\bdocument\s*\.\s*write\s*\(", re.IGNORECASE),
 }
 
 
@@ -70,10 +60,13 @@ def _validate_tag(tag: Tag, *, allow_inline_script: bool) -> None:
     for attribute_name, attribute_value in list(tag.attrs.items()):
         normalized_attribute = attribute_name.lower()
 
-        if normalized_attribute.startswith("on"):
+        if normalized_attribute.startswith("on") and not allow_inline_script:
             raise HtmlSanitizationError(f"Disallowed event handler attribute: {attribute_name}")
 
         if normalized_attribute in URL_ATTRIBUTES:
+            if tag_name == "script" and normalized_attribute == "src":
+                continue
+
             for value in _iter_attribute_values(attribute_value):
                 _validate_url_attribute(attribute_name, value)
 
@@ -82,7 +75,10 @@ def _validate_script_tag(tag: Tag) -> None:
     script_type = str(tag.attrs.get("type", "")).lower().strip()
 
     if "src" in tag.attrs:
-        raise HtmlSanitizationError("External JavaScript is not allowed.")
+        src_value = str(tag.attrs.get("src", "")).strip().lower()
+
+        if not src_value.startswith("https://"):
+            raise HtmlSanitizationError("External JavaScript must use HTTPS.")
 
     if script_type and script_type not in {"text/javascript", "application/javascript", "module"}:
         raise HtmlSanitizationError(f"Unsupported script type: {script_type}")

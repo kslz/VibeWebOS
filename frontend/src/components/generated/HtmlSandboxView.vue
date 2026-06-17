@@ -55,7 +55,7 @@ onBeforeUnmount(() => {
     class="html-sandbox-view"
     :srcdoc="sandboxHtml"
     :title="title"
-    sandbox="allow-forms allow-scripts"
+    sandbox="allow-forms allow-scripts allow-same-origin"
   />
 </template>
 

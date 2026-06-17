@@ -69,13 +69,35 @@ def test_preserves_safe_inline_script_with_function_callback() -> None:
     assert "addEventListener" in sanitized
 
 
+def test_preserves_open_generated_app_runtime_capabilities() -> None:
+    html = """
+    <section>
+      <button onclick="renderChart()" type="button">刷新图表</button>
+      <canvas id="chart"></canvas>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        localStorage.setItem('vibe-demo', '1');
+        fetch('https://api.example.com/data.json');
+        const socket = new WebSocket('wss://example.com/live');
+        socket.close();
+      </script>
+    </section>
+    """
+
+    sanitized = sanitize_html(html)
+
+    assert 'onclick="renderChart()"' in sanitized
+    assert 'src="https://cdn.jsdelivr.net/npm/chart.js"' in sanitized
+    assert "localStorage" in sanitized
+    assert "fetch" in sanitized
+    assert "WebSocket" in sanitized
+
+
 @pytest.mark.parametrize(
     "html",
     [
         "<iframe src='https://example.com'></iframe>",
-        "<button onclick='steal()'>点我</button>",
         "<a href='javascript:alert(1)'>坏链接</a>",
-        "<script src='https://example.com/app.js'></script>",
         "<img src='ftp://example.com/file.png'>",
         "<img src='https://example.com/tracker.js'>",
         "<meta http-equiv='refresh' content='0;url=https://example.com'>",
@@ -89,27 +111,12 @@ def test_rejects_unsafe_html(html: str) -> None:
 @pytest.mark.parametrize(
     "script",
     [
-        "fetch('/api/private')",
-        "new XMLHttpRequest()",
-        "new WebSocket('wss://example.com')",
-        "new EventSource('/stream')",
-        "localStorage.setItem('x', '1')",
-        "sessionStorage.getItem('x')",
-        "indexedDB.open('x')",
-        "document.cookie = 'x=1'",
-        "navigator.clipboard.writeText('x')",
-        "navigator.mediaDevices.getUserMedia({ audio: true })",
-        "navigator.geolocation.getCurrentPosition(() => {})",
         "window.parent.document.body",
         "window.top.location = 'https://example.com'",
         "opener.location = 'https://example.com'",
-        "import value from 'https://example.com/app.js'",
-        "import('https://example.com/app.js')",
-        "Function('return window')()",
-        "new Function('return window')",
-        "eval('window')",
+        "document.body.ownerDocument.defaultView.parent.document.body",
     ],
 )
-def test_rejects_dangerous_inline_script_capabilities(script: str) -> None:
+def test_rejects_parent_window_escape_capabilities(script: str) -> None:
     with pytest.raises(HtmlSanitizationError):
         sanitize_html(f"<section><script>{script}</script></section>")
