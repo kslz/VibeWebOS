@@ -62,7 +62,7 @@ http://127.0.0.1:8000/health
 ```powershell
 cd frontend
 npm install --registry=https://registry.npmmirror.com
-npm run dev -- --host 127.0.0.1
+npm run dev
 ```
 
 打开：
@@ -72,6 +72,8 @@ http://127.0.0.1:5173
 ```
 
 Vite 开发服务器默认把 `/api` 请求代理到 `http://127.0.0.1:8000`。
+
+`frontend/package.json` 里的 `dev` 脚本已经包含 `--host 0.0.0.0`。不要再追加 `-- --host 127.0.0.1`，否则 Vite 可能把 `127.0.0.1` 当作项目根目录，导致首页返回 404。
 
 ## 测试命令
 
