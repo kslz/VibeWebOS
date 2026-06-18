@@ -30,10 +30,16 @@ python -m venv .venv
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
-启动前通过环境变量设置 DeepSeek API Key：
+首次启动前在项目根目录复制环境变量示例文件，并在 `backend/.env` 中填写 API Key：
 
 ```powershell
-$env:DEEPSEEK_API_KEY = "your-api-key"
+copy backend\.env.example backend\.env
+```
+
+然后启动后端：
+
+```powershell
+cd backend
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
@@ -54,6 +60,20 @@ http://127.0.0.1:8000/health
 ```json
 { "status": "ok" }
 ```
+
+## 运行时配置
+
+非敏感运行时配置位于 `config/app.config.json`。可以按需编辑 `llm.provider`、`llm.baseUrl`、`llm.model`、`llm.requestTimeoutSeconds`、`ui.systemName`、`ui.aboutText`、`ui.waitingTexts` 和 `ui.waitingTextSwitchDelayMs`。
+
+API Key 不能写入 `config/app.config.json`。复制 `backend/.env.example` 到 `backend/.env` 后，`backend/.env` 只应包含：
+
+```env
+LLM_API_KEY=your-api-key
+```
+
+复杂生成应用如果出现请求超时，可以在 `config/app.config.json` 中调大 `llm.requestTimeoutSeconds`。
+
+前端 UI 文案通过 UI-only artifact/sync script 消费 UI 配置；不要在前端业务代码中直接 import 根配置 JSON，以免把后端 LLM 配置误带进前端。
 
 ## 前端启动
 
