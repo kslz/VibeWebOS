@@ -642,12 +642,12 @@
 - Modify as needed: `frontend/`
 - Modify as needed: `backend/`
 
-- [ ] Run frontend lint, typecheck, tests, and production build.
-- [ ] Run backend tests.
-- [ ] Run a final manual smoke test for desktop, window controls, app search, generated app, browser, settings, about, loading, and errors.
-- [ ] Remove temporary debug UI and console noise.
-- [ ] Confirm first-version non-goals are not accidentally implemented.
-- [ ] Commit as `chore: prepare mvp release`.
+- [x] Run frontend lint, typecheck, tests, and production build.
+- [x] Run backend tests.
+- [x] Run a final manual smoke test for desktop, window controls, app search, generated app, browser, settings, about, loading, and errors.
+- [x] Remove temporary debug UI and console noise.
+- [x] Confirm first-version non-goals are not accidentally implemented.
+- [x] Commit as `chore: prepare mvp release`.
 
 **Acceptance:**
 - The project can be started from README instructions.

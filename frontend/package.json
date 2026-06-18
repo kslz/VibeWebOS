@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vue-tsc -b && vite build",
+    "lint": "eslint \"src/**/*.{ts,vue}\"",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
     "typecheck": "vue-tsc -b"
@@ -20,7 +21,12 @@
     "vue-tsc": "^2.2.10"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-vue": "^10.9.2",
     "happy-dom": "^20.10.5",
-    "vitest": "^4.1.9"
+    "typescript-eslint": "^8.61.1",
+    "vitest": "^4.1.9",
+    "vue-eslint-parser": "^10.4.1"
   }
 }

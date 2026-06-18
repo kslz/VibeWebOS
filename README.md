@@ -81,6 +81,7 @@ Vite 开发服务器默认把 `/api` 请求代理到 `http://127.0.0.1:8000`。
 
 ```powershell
 cd frontend
+npm run lint
 npm test
 npm run typecheck
 npm run build

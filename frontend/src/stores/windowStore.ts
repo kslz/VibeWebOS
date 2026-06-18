@@ -318,16 +318,6 @@ export const useWindowStore = defineStore('window', () => {
     return windowId;
   }
 
-  function getGeneratedAppPayload(windowId: string) {
-    const window = getWindow(windowId);
-
-    if (window?.content.kind !== 'generatedHtml') {
-      return null;
-    }
-
-    return window.content.payload as GeneratedAppWindowPayload;
-  }
-
   function setGeneratedAppContent(
     windowId: string,
     response: AppGenerateResponse,
