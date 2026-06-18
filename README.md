@@ -9,6 +9,8 @@ VibeWebOS 是一个运行在浏览器里的桌面系统 MVP，整体体验参考
 
 **注意：这是一个玩具性质的项目#（滑稽）**
 
+灵感来自 : **https://www.youtube.com/live/HG0twQJ7aG4?t=16050**
+
 ![img](./imgs/img1.png)
 
 ## 当前能力
