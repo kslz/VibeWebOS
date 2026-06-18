@@ -69,7 +69,7 @@ http://127.0.0.1:8000/health
 API Key 不能写入 `config/app.config.json`。复制 `backend/.env.example` 到 `backend/.env` 后，`backend/.env` 只应包含：
 
 ```env
-LLM_API_KEY=your-api-key
+LLM_API_KEY=
 ```
 
 复杂生成应用如果出现请求超时，可以在 `config/app.config.json` 中调大 `llm.requestTimeoutSeconds`。

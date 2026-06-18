@@ -69,7 +69,7 @@ API keys remain backend-only and must be loaded from `.env` or real environment 
 Supported names:
 
 ```env
-LLM_API_KEY=...
+LLM_API_KEY=
 ```
 
 `LLM_API_KEY` is the only supported API key environment variable for this configuration work.

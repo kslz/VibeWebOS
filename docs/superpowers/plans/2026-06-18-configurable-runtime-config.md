@@ -626,7 +626,7 @@ Add a section after backend startup instructions. The inserted README section mu
 - Users may edit `llm.provider`, `llm.baseUrl`, `llm.model`, `llm.requestTimeoutSeconds`, `ui.systemName`, `ui.aboutText`, `ui.waitingTexts`, and `ui.waitingTextSwitchDelayMs`.
 - API Key must not be written to `config/app.config.json`.
 - Users should copy `backend/.env.example` to `backend/.env`.
-- `backend/.env` contains only `LLM_API_KEY=your-api-key`.
+- `backend/.env` contains only `LLM_API_KEY` with the user's own key as its value.
 - Complex generated apps that time out can use a larger `llm.requestTimeoutSeconds` value in `config/app.config.json`.
 
 Use fenced blocks only for the exact command examples:
@@ -636,7 +636,7 @@ copy backend\.env.example backend\.env
 ```
 
 ```env
-LLM_API_KEY=your-api-key
+LLM_API_KEY=
 ```
 
 - [ ] **Step 3: Update acceptance record**
@@ -741,10 +741,11 @@ Run:
 
 ```powershell
 cd ..
-rg -n "sk-[A-Za-z0-9]{16,}|LLM_API_KEY=.+" -g "!frontend/node_modules/**" -g "!frontend/dist/**" -g "!backend/.venv/**" -g "!**/.git/**" .
+$secretPattern = "sk-[A-Za-z0-9]{16,}|" + "LLM_API_KEY=" + ".+"
+rg -n $secretPattern -g "!frontend/node_modules/**" -g "!frontend/dist/**" -g "!backend/.venv/**" -g "!**/.git/**" .
 ```
 
-Expected: no real key. `backend/.env.example` may contain the empty placeholder `LLM_API_KEY=`.
+Expected: no real key. `backend/.env.example` may contain `LLM_API_KEY` with an empty value.
 
 - [ ] **Step 7: Verify startup paths**
 
