@@ -82,6 +82,17 @@ def test_runtime_config_rejects_non_positive_timeout() -> None:
         )
 
 
+def test_runtime_config_rejects_invalid_base_url() -> None:
+    with pytest.raises(ValidationError):
+        RuntimeConfig.model_validate(
+            {
+                "llm": {
+                    "baseUrl": "not-a-url",
+                }
+            }
+        )
+
+
 def test_runtime_config_does_not_define_api_key_fields() -> None:
     config = RuntimeConfig()
     serialized = config.model_dump(by_alias=True)

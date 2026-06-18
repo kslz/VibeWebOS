@@ -3,8 +3,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Annotated
+from urllib.parse import urlparse
 
-from pydantic import BaseModel, ConfigDict, Field, PositiveFloat, PositiveInt, StringConstraints
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PositiveFloat,
+    PositiveInt,
+    StringConstraints,
+    field_validator,
+)
 
 NonEmptyString = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
@@ -17,6 +26,14 @@ class LlmRuntimeConfig(BaseModel):
     model: NonEmptyString = "deepseek-v4-flash"
     request_timeout_seconds: PositiveFloat = Field(default=60, alias="requestTimeoutSeconds")
 
+    @field_validator("base_url")
+    @classmethod
+    def validate_base_url(cls, value: str) -> str:
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise ValueError("baseUrl must be an absolute HTTP(S) URL.")
+        return value
+
 
 class UiRuntimeConfig(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -24,17 +41,17 @@ class UiRuntimeConfig(BaseModel):
     system_name: NonEmptyString = Field(default="VibeWebOS", alias="systemName")
     about_text: NonEmptyString = Field(
         default=(
-            "VibeWebOS 鏄竴涓腑鏂囨祻瑙堝櫒妗岄潰 MVP銆傚畠浠?Windows 11 椋庢牸鍛堢幇澶氱獥鍙ｅ簲鐢ㄣ€?"
-            "娴忚鍣ㄥ拰鐢卞ぇ妯″瀷鐢熸垚鐨勯〉闈㈠唴瀹癸紝鎵€鏈夌姸鎬佷粎淇濆瓨鍦ㄥ綋鍓嶆祻瑙堝櫒鍐呭瓨涓€?"
+            "VibeWebOS 是一个中文浏览器桌面 MVP。它以 Windows 11 风格呈现多窗口应用、"
+            "浏览器和由大模型生成的页面内容，所有状态仅保存在当前浏览器内存中。"
         ),
         alias="aboutText",
     )
     waiting_texts: list[NonEmptyString] = Field(
         default_factory=lambda: [
-            "姝ｅ湪鏁寸悊浣犵殑鎯虫硶...",
-            "姝ｅ湪鐢熸垚涓€涓洿鍍忓簲鐢ㄧ殑鐣岄潰...",
-            "姝ｅ湪妫€鏌ラ〉闈㈢粨鏋?..",
-            "姝ｅ湪鍑嗗绐楀彛鍐呭...",
+            "正在整理你的想法...",
+            "正在生成一个更像应用的界面...",
+            "正在检查页面结构...",
+            "正在准备窗口内容...",
         ],
         alias="waitingTexts",
         min_length=1,
