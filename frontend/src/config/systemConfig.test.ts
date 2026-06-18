@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const rootConfigPath = '../../../config/app.config.json';
+const runtimeUiConfigPath = './runtime-ui-config.json';
 
 const importSystemConfig = async () => {
   const module = await import('./systemConfig');
@@ -9,7 +9,7 @@ const importSystemConfig = async () => {
 
 describe('systemConfig runtime config', () => {
   afterEach(() => {
-    vi.doUnmock(rootConfigPath);
+    vi.doUnmock(runtimeUiConfigPath);
     vi.resetModules();
   });
 
@@ -27,22 +27,9 @@ describe('systemConfig runtime config', () => {
     expect(systemConfig.waitingTextSwitchDelayMs).toBe(5000);
   });
 
-  it('uses only ui values from the root runtime config', async () => {
-    vi.doMock(rootConfigPath, () => ({
+  it('uses values from the frontend-safe UI config artifact', async () => {
+    vi.doMock(runtimeUiConfigPath, () => ({
       default: {
-        llm: {
-          baseUrl: 'https://api.deepseek.com',
-          model: 'deepseek-v4-flash',
-          apiKeyEnv: 'LLM_API_KEY',
-        },
-        ui: {
-          systemName: 'Custom OS',
-          aboutText: 'Custom about text',
-          waitingTexts: ['Custom waiting text'],
-          waitingTextSwitchDelayMs: 1234,
-        },
-      },
-      ui: {
         systemName: 'Custom OS',
         aboutText: 'Custom about text',
         waitingTexts: ['Custom waiting text'],
@@ -61,6 +48,16 @@ describe('systemConfig runtime config', () => {
     expect(JSON.stringify(systemConfig)).not.toContain('LLM_API_KEY');
     expect(JSON.stringify(systemConfig)).not.toContain('deepseek-v4-flash');
     expect(JSON.stringify(systemConfig)).not.toContain('api.deepseek.com');
+  });
+
+  it('keeps the frontend-safe UI config artifact free of LLM markers', async () => {
+    const runtimeUiConfig = await import(runtimeUiConfigPath);
+    const serializedConfig = JSON.stringify(runtimeUiConfig.default);
+
+    expect(serializedConfig).not.toContain('llm');
+    expect(serializedConfig).not.toContain('LLM_API_KEY');
+    expect(serializedConfig).not.toContain('deepseek-v4-flash');
+    expect(serializedConfig).not.toContain('api.deepseek.com');
   });
 
   it('does not expose LLM config to the frontend facade', async () => {

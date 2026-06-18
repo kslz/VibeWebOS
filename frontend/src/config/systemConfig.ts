@@ -1,5 +1,5 @@
 import type { BuiltInAppId, ThemeMode } from '@/types/app';
-import { ui as rootRuntimeUiConfig } from '../../../config/app.config.json';
+import runtimeUiConfigJson from './runtime-ui-config.json';
 
 interface RuntimeUiConfig {
   systemName?: string;
@@ -21,7 +21,7 @@ const defaultUiConfig = {
   waitingTextSwitchDelayMs: 5000,
 };
 
-const runtimeUiConfig = (rootRuntimeUiConfig ?? {}) as RuntimeUiConfig;
+const runtimeUiConfig = (runtimeUiConfigJson ?? {}) as RuntimeUiConfig;
 const waitingTexts =
   runtimeUiConfig.waitingTexts && runtimeUiConfig.waitingTexts.length > 0
     ? runtimeUiConfig.waitingTexts
