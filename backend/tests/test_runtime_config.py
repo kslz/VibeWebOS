@@ -108,7 +108,7 @@ def test_settings_reads_llm_api_key_only_from_generic_env(
     monkeypatch.setenv("LLM_API_KEY", "generic-key")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "legacy-key")
 
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.deepseek_api_key == "generic-key"
 
@@ -117,7 +117,7 @@ def test_settings_ignores_legacy_deepseek_api_key(monkeypatch: pytest.MonkeyPatc
     monkeypatch.delenv("LLM_API_KEY", raising=False)
     monkeypatch.setenv("DEEPSEEK_API_KEY", "legacy-key")
 
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.deepseek_api_key is None
 
@@ -130,7 +130,7 @@ def test_settings_uses_runtime_config_for_llm_defaults(
     monkeypatch.delenv("DEEPSEEK_MODEL", raising=False)
     monkeypatch.delenv("REQUEST_TIMEOUT_SECONDS", raising=False)
 
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.deepseek_base_url == "https://api.deepseek.com"
     assert settings.deepseek_model == "deepseek-v4-flash"
@@ -141,6 +141,6 @@ def test_settings_ignores_timeout_env_overrides(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setenv("REQUEST_TIMEOUT_SECONDS", "5")
     monkeypatch.setenv("LLM_REQUEST_TIMEOUT_SECONDS", "10")
 
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.request_timeout_seconds == 60
