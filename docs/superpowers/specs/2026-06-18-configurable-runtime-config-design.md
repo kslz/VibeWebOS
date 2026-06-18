@@ -45,7 +45,7 @@ Initial shape:
   "llm": {
     "provider": "deepseek",
     "baseUrl": "https://api.deepseek.com",
-    "model": "deepseek-chat",
+    "model": "deepseek-v4-flash",
     "requestTimeoutSeconds": 60
   },
   "ui": {
@@ -70,14 +70,12 @@ Supported names:
 
 ```env
 LLM_API_KEY=...
-DEEPSEEK_API_KEY=...
 LLM_REQUEST_TIMEOUT_SECONDS=60
-REQUEST_TIMEOUT_SECONDS=60
 ```
 
-`LLM_API_KEY` is the preferred generic name. `DEEPSEEK_API_KEY` remains supported for compatibility with the current MVP.
+`LLM_API_KEY` is the only supported API key environment variable for this configuration work.
 
-`LLM_REQUEST_TIMEOUT_SECONDS` is the preferred generic timeout override. `REQUEST_TIMEOUT_SECONDS` remains supported for compatibility with the current MVP. This timeout controls how long the backend waits for the LLM provider to finish a request before returning a controlled timeout error. Complex generated apps may need a higher value than the default.
+`LLM_REQUEST_TIMEOUT_SECONDS` is the only supported timeout override. This timeout controls how long the backend waits for the LLM provider to finish a request before returning a controlled timeout error. Complex generated apps may need a higher value than the default.
 
 No API key is written to `config/app.config.json`, frontend source, frontend build output, README examples with real values, tests, or docs.
 
@@ -106,13 +104,9 @@ Backend config loading should:
 - Fail fast with a clear error if the file exists but contains invalid JSON or invalid field types.
 - Use `llm.baseUrl` and `llm.model` as defaults for `DeepSeekClient`.
 - Use `llm.requestTimeoutSeconds` as the default LLM provider timeout.
-- Use `LLM_API_KEY` first, then `DEEPSEEK_API_KEY`, for the API key.
-- Use `LLM_REQUEST_TIMEOUT_SECONDS` first, then `REQUEST_TIMEOUT_SECONDS`, for the LLM provider timeout.
-- Preserve current env compatibility:
-  - `DEEPSEEK_BASE_URL`
-  - `DEEPSEEK_MODEL`
-  - `REQUEST_TIMEOUT_SECONDS`
-  - `MAX_HTML_LENGTH`
+- Use `LLM_API_KEY` for the API key.
+- Use `LLM_REQUEST_TIMEOUT_SECONDS` for the LLM provider timeout.
+- Keep model and base URL in `config/app.config.json` instead of additional environment variables.
 
 Recommended model names:
 
@@ -180,9 +174,9 @@ Backend tests:
 - Loads defaults when `config/app.config.json` is missing.
 - Loads LLM base URL/model from config file.
 - Loads LLM request timeout from config file.
-- `LLM_API_KEY` takes priority over `DEEPSEEK_API_KEY`.
-- `LLM_REQUEST_TIMEOUT_SECONDS` takes priority over `REQUEST_TIMEOUT_SECONDS`.
-- Existing `DEEPSEEK_*` environment variables remain compatible.
+- Reads `LLM_API_KEY` from `.env` or environment variables.
+- Reads `LLM_REQUEST_TIMEOUT_SECONDS` from `.env` or environment variables.
+- Does not require or document `DEEPSEEK_*` compatibility aliases.
 - Invalid config JSON produces a clear error.
 - Runtime config never serializes API keys.
 
