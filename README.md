@@ -30,9 +30,10 @@ python -m venv .venv
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
-首次启动前在项目根目录复制环境变量示例文件，并在 `backend/.env` 中填写 API Key：
+首次启动前回到项目根目录，复制环境变量示例文件，并在 `backend/.env` 中填写 API Key：
 
 ```powershell
+cd ..
 copy backend\.env.example backend\.env
 ```
 
