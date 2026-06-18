@@ -161,19 +161,20 @@ watch(
   grid-template-rows: auto minmax(0, 1fr);
   min-height: 100%;
   gap: 14px;
-  padding: 16px;
+  padding: 18px;
 }
 
 .browser-app__toolbar {
   display: grid;
   width: min(680px, 100%);
-  gap: 16px;
+  gap: 14px;
   justify-self: center;
   text-align: center;
 }
 
 .browser-app__toolbar--home {
   align-self: center;
+  padding: 24px 0;
 }
 
 .browser-app__eyebrow {
@@ -186,7 +187,7 @@ watch(
 .browser-app h2 {
   margin: 0;
   color: var(--color-text-primary);
-  font-size: 32px;
+  font-size: 30px;
 }
 
 .browser-app__search {
@@ -216,6 +217,11 @@ watch(
   background: var(--color-panel-bg);
 }
 
+.browser-app__input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
 .browser-app__button {
   height: 42px;
   padding: 0 18px;
@@ -223,6 +229,13 @@ watch(
   border-radius: 8px;
   color: #ffffff;
   background: var(--color-accent);
+}
+
+.browser-app__button:hover,
+.browser-app__button:focus-visible {
+  border-color: var(--color-accent-strong);
+  background: var(--color-accent-strong);
+  outline: none;
 }
 
 .browser-app__url {

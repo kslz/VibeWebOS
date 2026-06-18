@@ -27,7 +27,6 @@ const windowStore = useWindowStore();
           @open="desktopStore.openApp"
         />
       </div>
-
     </section>
 
     <WindowManager />
@@ -55,23 +54,33 @@ const windowStore = useWindowStore();
   overflow: hidden;
   color: var(--color-text-primary);
   background: var(--color-desktop-bg);
+  background-attachment: fixed;
   transition:
     color 160ms ease,
     background 160ms ease;
 }
 
+.desktop-shell::before {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent 32%, rgba(255, 255, 255, 0.06)),
+    linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.08) 100%);
+  content: '';
+  pointer-events: none;
+}
+
 .desktop-shell__workspace {
   position: absolute;
   inset: 0;
-  padding: 28px 24px 74px;
+  padding: 30px 26px 78px;
 }
 
 .desktop-shell__icons {
   display: grid;
   grid-auto-flow: row;
-  grid-template-columns: 86px;
+  grid-template-columns: 88px;
   align-content: start;
-  gap: 12px;
+  gap: 14px;
 }
-
 </style>

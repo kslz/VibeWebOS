@@ -344,10 +344,14 @@ onBeforeUnmount(() => {
   border-radius: 8px;
   background: var(--color-window-bg);
   box-shadow: var(--shadow-window);
+  backdrop-filter: blur(22px) saturate(150%);
 }
 
 .app-window--active {
-  border-color: color-mix(in srgb, var(--color-accent) 58%, var(--color-border));
+  border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border));
+  box-shadow:
+    var(--shadow-window),
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent);
 }
 
 .app-window--maximized {
@@ -358,7 +362,7 @@ onBeforeUnmount(() => {
   position: relative;
   min-height: 0;
   color: var(--color-text-primary);
-  background: var(--color-window-bg);
+  background: color-mix(in srgb, var(--color-window-bg) 84%, transparent);
 }
 
 .app-window__content {
@@ -387,10 +391,10 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border: 1px solid #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.54);
   border-radius: 8px;
   color: #991b1b;
-  background: #fee2e2;
+  background: color-mix(in srgb, #fee2e2 88%, var(--color-panel-strong-bg));
   box-shadow: 0 14px 36px rgba(127, 29, 29, 0.16);
 }
 

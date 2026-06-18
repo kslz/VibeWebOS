@@ -90,13 +90,13 @@ onBeforeUnmount(() => {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  height: 48px;
-  padding: 6px 10px;
+  height: 50px;
+  padding: 7px 10px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-taskbar-bg);
-  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
-  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(24px) saturate(150%);
 }
 
 .taskbar__start {
@@ -115,7 +115,7 @@ onBeforeUnmount(() => {
 .taskbar__start:focus-visible,
 .taskbar__start[aria-expanded='true'] {
   border-color: var(--color-border);
-  background: rgba(148, 163, 184, 0.16);
+  background: var(--color-active-bg);
   outline: none;
 }
 
@@ -128,13 +128,13 @@ onBeforeUnmount(() => {
 }
 
 .taskbar__window {
-  max-width: 180px;
+  max-width: 190px;
   height: 34px;
   padding: 0 12px;
   border: 1px solid transparent;
   border-radius: 8px;
   color: var(--color-text-primary);
-  background: rgba(148, 163, 184, 0.1);
+  background: var(--color-hover-bg);
   font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -145,7 +145,7 @@ onBeforeUnmount(() => {
 .taskbar__window:focus-visible,
 .taskbar__window--active {
   border-color: var(--color-border);
-  background: rgba(148, 163, 184, 0.2);
+  background: var(--color-active-bg);
   outline: none;
 }
 

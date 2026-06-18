@@ -43,7 +43,7 @@ const themeOptions: Array<{ label: string; value: ThemeMode }> = [
 .settings-app {
   display: grid;
   align-content: start;
-  gap: 16px;
+  gap: 18px;
   padding: 24px;
 }
 
@@ -67,11 +67,11 @@ const themeOptions: Array<{ label: string; value: ThemeMode }> = [
 
 .settings-app__panel {
   display: grid;
-  gap: 10px;
-  padding: 14px;
+  gap: 12px;
+  padding: 16px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: rgba(148, 163, 184, 0.08);
+  background: var(--color-panel-bg);
 }
 
 .settings-app__label {
@@ -86,7 +86,7 @@ const themeOptions: Array<{ label: string; value: ThemeMode }> = [
   padding: 4px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--color-panel-bg);
+  background: var(--color-panel-strong-bg);
 }
 
 .settings-app__segment {
@@ -95,6 +95,12 @@ const themeOptions: Array<{ label: string; value: ThemeMode }> = [
   border-radius: 6px;
   color: var(--color-text-secondary);
   background: transparent;
+}
+
+.settings-app__segment:hover,
+.settings-app__segment:focus-visible {
+  background: var(--color-hover-bg);
+  outline: none;
 }
 
 .settings-app__segment--active {
@@ -110,5 +116,12 @@ const themeOptions: Array<{ label: string; value: ThemeMode }> = [
   border-radius: 8px;
   color: var(--color-text-primary);
   background: var(--color-panel-bg);
+}
+
+.settings-app__about:hover,
+.settings-app__about:focus-visible {
+  border-color: var(--color-accent);
+  background: var(--color-hover-bg);
+  outline: none;
 }
 </style>

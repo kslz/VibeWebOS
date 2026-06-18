@@ -567,14 +567,14 @@
 - Modify: `frontend/src/apps/SettingsApp/SettingsApp.vue`
 - Modify: `frontend/src/apps/AboutApp/AboutApp.vue`
 
-- [ ] Refine desktop background, taskbar translucency, window shadows, rounded corners, and title bar controls.
-- [ ] Keep visual style serious and operating-system-like, not obviously comedic.
-- [ ] Use Chinese UI text throughout system surfaces.
-- [ ] Keep AboutApp as the only place that explains the project is a simulated system.
-- [ ] Ensure generated pages and browser pages do not show “AI 生成” or “模拟内容” labels.
-- [ ] Verify text does not overflow compact controls.
-- [ ] Verify light and dark themes are both readable.
-- [ ] Commit as `style: polish desktop visual design`.
+- [x] Refine desktop background, taskbar translucency, window shadows, rounded corners, and title bar controls.
+- [x] Keep visual style serious and operating-system-like, not obviously comedic.
+- [x] Use Chinese UI text throughout system surfaces.
+- [x] Keep AboutApp as the only place that explains the project is a simulated system.
+- [x] Ensure generated pages and browser pages do not show “AI 生成” or “模拟内容” labels.
+- [x] Verify text does not overflow compact controls.
+- [x] Verify light and dark themes are both readable.
+- [x] Commit as `style: polish desktop visual design`.
 
 **Acceptance:**
 - The first viewport reads as a polished Chinese Windows 11-like desktop.

@@ -23,8 +23,8 @@ defineProps<{
   display: grid;
   place-items: center;
   padding: 24px;
-  background: color-mix(in srgb, var(--color-window-bg) 78%, transparent);
-  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--color-window-bg) 72%, transparent);
+  backdrop-filter: blur(12px) saturate(140%);
   pointer-events: auto;
 }
 
@@ -37,8 +37,8 @@ defineProps<{
   border: 1px solid var(--color-border);
   border-radius: 8px;
   color: var(--color-text-primary);
-  background: var(--color-panel-bg);
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.18);
+  background: var(--color-panel-strong-bg);
+  box-shadow: var(--shadow-panel);
   text-align: center;
 }
 

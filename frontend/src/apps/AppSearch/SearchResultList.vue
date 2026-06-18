@@ -42,15 +42,18 @@ defineEmits<{
   min-height: 180px;
   border: 1px dashed var(--color-border);
   border-radius: 8px;
-  background: rgba(148, 163, 184, 0.08);
+  background: var(--color-panel-bg);
 }
 
 .search-result-list__empty {
   align-self: center;
   justify-self: center;
+  max-width: min(360px, calc(100% - 32px));
   margin: 0;
   color: var(--color-text-secondary);
   font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .search-result-list__items {
@@ -70,13 +73,14 @@ defineEmits<{
   border-radius: 8px;
   color: inherit;
   text-align: left;
-  background: var(--color-panel-bg);
+  background: var(--color-panel-strong-bg);
   cursor: pointer;
 }
 
 .search-result-list__item:hover,
 .search-result-list__item:focus-visible {
   border-color: var(--color-accent);
+  background: var(--color-hover-bg);
   outline: none;
 }
 
@@ -104,7 +108,7 @@ defineEmits<{
   padding: 4px 8px;
   border: 1px solid var(--color-border);
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.04);
+  background: color-mix(in srgb, var(--color-panel-bg) 82%, transparent);
 }
 
 .search-result-list__meta dt,

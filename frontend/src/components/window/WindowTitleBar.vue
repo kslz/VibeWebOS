@@ -52,7 +52,9 @@ defineEmits<{
   padding: 0 8px 0 14px;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text-primary);
-  background: rgba(148, 163, 184, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+    color-mix(in srgb, var(--color-window-bg) 72%, var(--color-panel-bg));
   cursor: move;
   user-select: none;
 }
@@ -69,26 +71,27 @@ defineEmits<{
 .window-title-bar__controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .window-title-bar__button {
   display: grid;
-  width: 30px;
-  height: 28px;
+  width: 34px;
+  height: 30px;
   place-items: center;
   border: 1px solid transparent;
   border-radius: 8px;
   color: var(--color-text-primary);
   background: transparent;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
+  line-height: 1;
 }
 
 .window-title-bar__button:hover,
 .window-title-bar__button:focus-visible {
   border-color: var(--color-border);
-  background: rgba(148, 163, 184, 0.18);
+  background: var(--color-hover-bg);
   outline: none;
 }
 

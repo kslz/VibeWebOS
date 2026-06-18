@@ -41,3 +41,16 @@ select {
 button {
   cursor: pointer;
 }
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+::selection {
+  color: #ffffff;
+  background: var(--color-accent);
+}

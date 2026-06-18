@@ -166,6 +166,11 @@ watch(
   background: var(--color-panel-bg);
 }
 
+.app-search__input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
 .app-search__button {
   height: 40px;
   padding: 0 16px;
@@ -173,5 +178,12 @@ watch(
   border-radius: 8px;
   color: #ffffff;
   background: var(--color-accent);
+}
+
+.app-search__button:hover,
+.app-search__button:focus-visible {
+  border-color: var(--color-accent-strong);
+  background: var(--color-accent-strong);
+  outline: none;
 }
 </style>

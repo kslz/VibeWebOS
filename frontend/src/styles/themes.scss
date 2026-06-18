@@ -1,27 +1,41 @@
 [data-theme='light'] {
   --color-desktop-bg:
-    radial-gradient(circle at 18% 20%, rgba(99, 179, 237, 0.36), transparent 28%),
-    linear-gradient(135deg, #f7fbff 0%, #dbeafe 46%, #eef2ff 100%);
-  --color-taskbar-bg: rgba(255, 255, 255, 0.76);
-  --color-window-bg: rgba(255, 255, 255, 0.96);
-  --color-panel-bg: rgba(255, 255, 255, 0.82);
-  --color-text-primary: #111827;
-  --color-text-secondary: #475569;
-  --color-border: rgba(148, 163, 184, 0.45);
+    radial-gradient(circle at 12% 18%, rgba(59, 130, 246, 0.26), transparent 26%),
+    radial-gradient(circle at 82% 14%, rgba(20, 184, 166, 0.18), transparent 28%),
+    radial-gradient(circle at 74% 78%, rgba(244, 114, 182, 0.16), transparent 30%),
+    linear-gradient(135deg, #f8fbff 0%, #ddeaff 44%, #f3f6fb 100%);
+  --color-taskbar-bg: rgba(255, 255, 255, 0.72);
+  --color-window-bg: rgba(255, 255, 255, 0.94);
+  --color-panel-bg: rgba(255, 255, 255, 0.78);
+  --color-panel-strong-bg: rgba(255, 255, 255, 0.9);
+  --color-text-primary: #172033;
+  --color-text-secondary: #526176;
+  --color-border: rgba(112, 128, 150, 0.32);
   --color-accent: #2563eb;
-  --shadow-window: 0 24px 80px rgba(15, 23, 42, 0.16);
+  --color-accent-strong: #1d4ed8;
+  --color-hover-bg: rgba(100, 116, 139, 0.12);
+  --color-active-bg: rgba(37, 99, 235, 0.14);
+  --shadow-window: 0 22px 70px rgba(31, 41, 55, 0.18), 0 3px 12px rgba(31, 41, 55, 0.08);
+  --shadow-panel: 0 16px 46px rgba(31, 41, 55, 0.14);
 }
 
 [data-theme='dark'] {
   --color-desktop-bg:
-    radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.24), transparent 30%),
-    linear-gradient(135deg, #111827 0%, #1e293b 50%, #312e81 100%);
-  --color-taskbar-bg: rgba(15, 23, 42, 0.72);
-  --color-window-bg: rgba(30, 41, 59, 0.96);
-  --color-panel-bg: rgba(15, 23, 42, 0.78);
+    radial-gradient(circle at 12% 18%, rgba(14, 165, 233, 0.18), transparent 28%),
+    radial-gradient(circle at 78% 20%, rgba(45, 212, 191, 0.12), transparent 30%),
+    radial-gradient(circle at 70% 82%, rgba(244, 114, 182, 0.1), transparent 30%),
+    linear-gradient(135deg, #0f172a 0%, #182235 48%, #111827 100%);
+  --color-taskbar-bg: rgba(15, 23, 42, 0.7);
+  --color-window-bg: rgba(24, 34, 51, 0.94);
+  --color-panel-bg: rgba(15, 23, 42, 0.72);
+  --color-panel-strong-bg: rgba(30, 41, 59, 0.88);
   --color-text-primary: #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-border: rgba(148, 163, 184, 0.34);
+  --color-text-secondary: #c1ccda;
+  --color-border: rgba(148, 163, 184, 0.26);
   --color-accent: #60a5fa;
-  --shadow-window: 0 24px 80px rgba(0, 0, 0, 0.34);
+  --color-accent-strong: #3b82f6;
+  --color-hover-bg: rgba(148, 163, 184, 0.12);
+  --color-active-bg: rgba(96, 165, 250, 0.16);
+  --shadow-window: 0 26px 76px rgba(0, 0, 0, 0.38), 0 3px 14px rgba(0, 0, 0, 0.24);
+  --shadow-panel: 0 18px 54px rgba(0, 0, 0, 0.32);
 }

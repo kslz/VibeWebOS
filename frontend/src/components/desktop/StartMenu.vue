@@ -27,6 +27,7 @@ defineEmits<{
         <span class="start-menu__icon" aria-hidden="true">{{ app.iconSymbol }}</span>
         <span class="start-menu__copy">
           <span class="start-menu__app-title">{{ app.title }}</span>
+          <span class="start-menu__app-description">{{ app.description }}</span>
         </span>
       </button>
     </div>
@@ -37,15 +38,15 @@ defineEmits<{
 .start-menu {
   position: absolute;
   right: 50%;
-  bottom: 64px;
-  width: min(420px, calc(100vw - 32px));
+  bottom: 66px;
+  width: min(430px, calc(100vw - 32px));
   padding: 18px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-panel-bg);
-  box-shadow: var(--shadow-window);
+  box-shadow: var(--shadow-panel);
   transform: translateX(50%);
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(26px) saturate(150%);
 }
 
 .start-menu__header {
@@ -74,10 +75,10 @@ defineEmits<{
 
 .start-menu__app {
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
+  grid-template-columns: 40px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  min-height: 56px;
+  min-height: 58px;
   padding: 8px;
   border: 1px solid transparent;
   border-radius: 8px;
@@ -89,29 +90,41 @@ defineEmits<{
 .start-menu__app:hover,
 .start-menu__app:focus-visible {
   border-color: var(--color-border);
-  background: rgba(148, 163, 184, 0.14);
+  background: var(--color-hover-bg);
   outline: none;
 }
 
 .start-menu__icon {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   place-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 58%, transparent);
   border-radius: 8px;
   color: #ffffff;
-  background: var(--color-accent);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.04)),
+    var(--color-accent);
   font-weight: 700;
 }
 
 .start-menu__copy {
   display: grid;
   min-width: 0;
+  gap: 2px;
 }
 
 .start-menu__app-title {
   font-size: 14px;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-menu__app-description {
+  color: var(--color-text-secondary);
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
