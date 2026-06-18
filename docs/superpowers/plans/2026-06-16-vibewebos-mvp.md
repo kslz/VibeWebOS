@@ -615,21 +615,21 @@
 - Create: `docs/验收记录.md`
 - Modify: `README.md`
 
-- [ ] Start backend with a real or mocked DeepSeek configuration.
-- [ ] Start frontend.
-- [ ] Verify all 27 acceptance criteria from `docs/设计文档.md`.
-- [ ] Record pass/fail notes in `docs/验收记录.md`.
-- [ ] Add known limitations matching the first-version non-goals.
-- [ ] Confirm refresh clears all windows and generated state.
-- [ ] Confirm closing a window loses that window state.
-- [ ] Confirm closing a generated app or browser window immediately destroys its LLM context.
-- [ ] Confirm two generated/browser windows cannot read or update each other's HTML, summary, form values, or recent interaction summaries.
-- [ ] Confirm calculator-like generated app interactions respond locally without LLM waiting state.
-- [ ] Confirm a CDN-backed generated app can render a chart or visualization.
-- [ ] Confirm generated app scripts cannot access parent DOM, desktop shell, taskbar, start menu, or sibling windows.
-- [ ] Confirm only marked generated app actions trigger `/api/app-interact`.
-- [ ] Confirm DeepSeek API key is absent from frontend code.
-- [ ] Commit as `docs: add mvp acceptance record`.
+- [x] Start backend with a real or mocked DeepSeek configuration.
+- [x] Start frontend.
+- [x] Verify all 27 acceptance criteria from `docs/设计文档.md`.
+- [x] Record pass/fail notes in `docs/验收记录.md`.
+- [x] Add known limitations matching the first-version non-goals.
+- [x] Confirm refresh clears all windows and generated state.
+- [x] Confirm closing a window loses that window state.
+- [x] Confirm closing a generated app or browser window immediately destroys its LLM context.
+- [x] Confirm two generated/browser windows cannot read or update each other's HTML, summary, form values, or recent interaction summaries.
+- [x] Confirm calculator-like generated app interactions respond locally without LLM waiting state.
+- [x] Confirm a CDN-backed generated app can render a chart or visualization.
+- [x] Confirm generated app scripts cannot access parent DOM, desktop shell, taskbar, start menu, or sibling windows.
+- [x] Confirm only marked generated app actions trigger `/api/app-interact`.
+- [x] Confirm DeepSeek API key is absent from frontend code.
+- [x] Commit as `docs: add mvp acceptance record`.
 
 **Acceptance:**
 - Every MVP acceptance criterion is either passed or explicitly documented with a blocking issue.
