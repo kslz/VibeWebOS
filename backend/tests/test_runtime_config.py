@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from app.config import Settings
 from app.runtime_config import RuntimeConfig, load_runtime_config
 
 
@@ -99,3 +100,47 @@ def test_runtime_config_does_not_define_api_key_fields() -> None:
 
     assert "apiKey" not in str(serialized)
     assert "LLM_API_KEY" not in str(serialized)
+
+
+def test_settings_reads_llm_api_key_only_from_generic_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("LLM_API_KEY", "generic-key")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "legacy-key")
+
+    settings = Settings()
+
+    assert settings.deepseek_api_key == "generic-key"
+
+
+def test_settings_ignores_legacy_deepseek_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "legacy-key")
+
+    settings = Settings()
+
+    assert settings.deepseek_api_key is None
+
+
+def test_settings_uses_runtime_config_for_llm_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_BASE_URL", raising=False)
+    monkeypatch.delenv("DEEPSEEK_MODEL", raising=False)
+    monkeypatch.delenv("REQUEST_TIMEOUT_SECONDS", raising=False)
+
+    settings = Settings()
+
+    assert settings.deepseek_base_url == "https://api.deepseek.com"
+    assert settings.deepseek_model == "deepseek-v4-flash"
+    assert settings.request_timeout_seconds == 60
+
+
+def test_settings_ignores_timeout_env_overrides(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("REQUEST_TIMEOUT_SECONDS", "5")
+    monkeypatch.setenv("LLM_REQUEST_TIMEOUT_SECONDS", "10")
+
+    settings = Settings()
+
+    assert settings.request_timeout_seconds == 60
