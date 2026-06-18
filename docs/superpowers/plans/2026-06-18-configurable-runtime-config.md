@@ -741,7 +741,7 @@ Run:
 
 ```powershell
 cd ..
-$secretPattern = "sk-[A-Za-z0-9]{16,}|" + "LLM_API_KEY=" + ".+"
+$secretPattern = "sk-[A-Za-z0-9]{16,}|" + "LLM_API_KEY" + "=" + ".+"
 rg -n $secretPattern -g "!frontend/node_modules/**" -g "!frontend/dist/**" -g "!backend/.venv/**" -g "!**/.git/**" .
 ```
 
