@@ -96,6 +96,22 @@ def test_preserves_open_generated_app_runtime_capabilities() -> None:
 @pytest.mark.parametrize(
     "html",
     [
+        "<script>const draft = sessionStorage.getItem('draft');</script>",
+        "<script src='https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js'></script>",
+        "<button onclick='saveDraft()' type='button'>Save</button>",
+        "<script>fetch('https://api.example.com/items');</script>",
+        "<script>const socket = new WebSocket('wss://example.com/live'); socket.close();</script>",
+    ],
+)
+def test_accepts_open_generated_app_runtime_features(html: str) -> None:
+    sanitized = sanitize_html(f"<section>{html}</section>")
+
+    assert "<section>" in sanitized
+
+
+@pytest.mark.parametrize(
+    "html",
+    [
         "<iframe src='https://example.com'></iframe>",
         "<a href='javascript:alert(1)'>坏链接</a>",
         "<img src='ftp://example.com/file.png'>",
@@ -120,3 +136,16 @@ def test_rejects_unsafe_html(html: str) -> None:
 def test_rejects_parent_window_escape_capabilities(script: str) -> None:
     with pytest.raises(HtmlSanitizationError):
         sanitize_html(f"<section><script>{script}</script></section>")
+
+
+@pytest.mark.parametrize(
+    "html",
+    [
+        "<a target='_top' href='https://example.com'>Top</a>",
+        "<form target='_parent' action='https://example.com'></form>",
+        "<script>location.href = 'javascript:alert(1)'</script>",
+    ],
+)
+def test_rejects_parent_navigation_and_dangerous_protocols(html: str) -> None:
+    with pytest.raises(HtmlSanitizationError):
+        sanitize_html(html)

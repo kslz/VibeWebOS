@@ -587,22 +587,22 @@
 - Modify: `frontend/package.json`
 - Modify: `backend/requirements.txt`
 
-- [ ] Add backend tests for schema validation.
-- [ ] Add backend tests for HTML sanitizer.
-- [ ] Add backend tests for LLM response validator.
-- [ ] Add backend tests for route error mapping with mocked DeepSeek client.
-- [ ] Add frontend tests for theme store.
-- [ ] Add frontend tests for window store lifecycle.
-- [ ] Add frontend tests for sensitive input redaction.
-- [ ] Add frontend tests for stale response guards.
-- [ ] Add frontend tests for window-level LLM context creation, isolation, and destruction on close.
-- [ ] Add frontend tests proving generated app and browser windows do not share context.
-- [ ] Add frontend tests proving unmarked generated app controls do not call LLM.
-- [ ] Add frontend tests proving marked generated app controls and `vibewebos:llm-request` messages call LLM with only current window context.
-- [ ] Add backend tests for open generated app runtime acceptance: inline scripts, HTTPS CDN scripts, event handler attributes, network APIs, and browser-side state.
-- [ ] Add backend tests for parent-window isolation rejection: parent, top, opener, top navigation, and dangerous protocols.
-- [ ] Add test scripts to frontend and backend startup docs.
-- [ ] Commit as `test: cover core mvp behavior`.
+- [x] Add backend tests for schema validation.
+- [x] Add backend tests for HTML sanitizer.
+- [x] Add backend tests for LLM response validator.
+- [x] Add backend tests for route error mapping with mocked DeepSeek client.
+- [x] Add frontend tests for theme store.
+- [x] Add frontend tests for window store lifecycle.
+- [x] Add frontend tests for sensitive input redaction.
+- [x] Add frontend tests for stale response guards.
+- [x] Add frontend tests for window-level LLM context creation, isolation, and destruction on close.
+- [x] Add frontend tests proving generated app and browser windows do not share context.
+- [x] Add frontend tests proving unmarked generated app controls do not call LLM.
+- [x] Add frontend tests proving marked generated app controls and `vibewebos:llm-request` messages call LLM with only current window context.
+- [x] Add backend tests for open generated app runtime acceptance: inline scripts, HTTPS CDN scripts, event handler attributes, network APIs, and browser-side state.
+- [x] Add backend tests for parent-window isolation rejection: parent, top, opener, top navigation, and dangerous protocols.
+- [x] Add test scripts to frontend and backend startup docs.
+- [x] Commit as `test: cover core mvp behavior`.
 
 **Acceptance:**
 - Parent-isolation-sensitive backend behavior has regression tests.

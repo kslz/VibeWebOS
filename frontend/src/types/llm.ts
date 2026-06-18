@@ -52,6 +52,7 @@ export interface AppInteractRequest {
   windowTitle: string;
   currentSummary: string;
   currentHtml: string;
+  recentInteractionSummaries: string[];
   userAction: UserAction;
   formValues: FormValues;
 }
@@ -66,6 +67,7 @@ export interface BrowserInteractRequest {
   currentUrl: string;
   currentSummary: string;
   currentHtml: string;
+  recentInteractionSummaries: string[];
   userAction: UserAction;
   formValues: FormValues;
 }

@@ -12,6 +12,17 @@ describe('AppWindow', () => {
     expect(source).toContain('formValues: redactFormValues(interaction.formValues)');
   });
 
+  it('builds generated app interaction requests from the current window context only', () => {
+    const source = readFileSync(fileURLToPath(new URL('./AppWindow.vue', import.meta.url)), 'utf8');
+
+    expect(source).toContain('const context = generatedPayload.context');
+    expect(source).toContain('currentSummary: context.currentSummary');
+    expect(source).toContain('currentHtml: context.currentHtml');
+    expect(source).toContain('recentInteractionSummaries: context.recentInteractionSummaries');
+    expect(source).not.toContain('openWindows.value.map');
+    expect(source).not.toContain('windows.value.map');
+  });
+
   it('retries the last failed generated app interaction instead of regenerating the app', () => {
     const source = readFileSync(fileURLToPath(new URL('./AppWindow.vue', import.meta.url)), 'utf8');
 

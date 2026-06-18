@@ -27,6 +27,9 @@
 当前 HTML：
 {current_html}
 
+当前窗口最近交互摘要：
+{recent_interaction_summaries}
+
 用户动作：
 {user_action}
 

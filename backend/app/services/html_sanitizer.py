@@ -18,6 +18,7 @@ DISALLOWED_TAGS = {
     "object",
 }
 URL_ATTRIBUTES = {"action", "href", "poster", "src", "xlink:href"}
+DISALLOWED_NAVIGATION_TARGETS = {"_parent", "_top"}
 DANGEROUS_PROTOCOLS = ("data:text/html", "javascript:", "vbscript:")
 SAFE_URL_PREFIXES = (
     "#",
@@ -33,6 +34,10 @@ SAFE_URL_PREFIXES = (
 URL_SCHEME_PATTERN = re.compile(r"^[a-z][a-z0-9+.-]*:", re.IGNORECASE)
 DISALLOWED_SCRIPT_PATTERNS = {
     "parent_window": re.compile(r"\b(window\s*\.\s*)?(parent|top|opener)\b", re.IGNORECASE),
+    "dangerous_protocol": re.compile(
+        r"\b(?:location|window\s*\.\s*location)(?:\s*\.\s*href)?\s*=\s*['\"]\s*(?:data:text/html|javascript:|vbscript:)",
+        re.IGNORECASE,
+    ),
 }
 
 
@@ -69,6 +74,11 @@ def _validate_tag(tag: Tag, *, allow_inline_script: bool) -> None:
 
             for value in _iter_attribute_values(attribute_value):
                 _validate_url_attribute(attribute_name, value)
+
+        if normalized_attribute == "target":
+            for value in _iter_attribute_values(attribute_value):
+                if value.lower() in DISALLOWED_NAVIGATION_TARGETS:
+                    raise HtmlSanitizationError("Disallowed parent navigation target.")
 
 
 def _validate_script_tag(tag: Tag) -> None:

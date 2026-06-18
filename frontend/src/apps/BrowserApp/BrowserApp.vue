@@ -86,6 +86,7 @@ async function handleBrowserInteraction(interaction: GeneratedAppInteractionEven
       currentUrl: context.currentUrl,
       currentSummary: context.currentSummary,
       currentHtml: context.currentHtml,
+      recentInteractionSummaries: context.recentInteractionSummaries,
       userAction: interaction.userAction,
       formValues: redactFormValues(interaction.formValues),
     });

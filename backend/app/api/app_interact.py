@@ -22,6 +22,7 @@ async def app_interact(
             window_title=request.window_title,
             current_summary=request.current_summary,
             current_html=request.current_html,
+            recent_interaction_summaries=request.recent_interaction_summaries,
             user_action=request.user_action.model_dump(by_alias=True),
             form_values=request.form_values,
         )

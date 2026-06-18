@@ -133,6 +133,7 @@ async function handleGeneratedInteraction(interaction: GeneratedAppInteractionEv
       windowTitle: props.window.title,
       currentSummary: context.currentSummary,
       currentHtml: context.currentHtml,
+      recentInteractionSummaries: context.recentInteractionSummaries,
       userAction: interaction.userAction,
       formValues: redactFormValues(interaction.formValues),
     });
