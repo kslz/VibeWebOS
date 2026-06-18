@@ -140,3 +140,7 @@ MVP 手工验收记录见 [docs/验收记录.md](docs/验收记录.md)。
 - 最近若干次交互摘要
 
 窗口上下文不保存完整历史对话。普通生成应用控件应优先使用本地 JavaScript 或 CDN 前端库处理；只有明确标记为需要 LLM 的控件，才会触发后端 LLM 请求。
+
+## 许可证
+
+本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。
