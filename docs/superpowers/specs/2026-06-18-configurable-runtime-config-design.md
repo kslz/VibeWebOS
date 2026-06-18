@@ -13,6 +13,7 @@ This should make it easy to change:
 - LLM provider name
 - LLM API base URL
 - LLM model
+- LLM request timeout
 - waiting-state copy
 - waiting text switch interval
 - system name
@@ -44,7 +45,8 @@ Initial shape:
   "llm": {
     "provider": "deepseek",
     "baseUrl": "https://api.deepseek.com",
-    "model": "deepseek-chat"
+    "model": "deepseek-chat",
+    "requestTimeoutSeconds": 60
   },
   "ui": {
     "systemName": "VibeWebOS",
@@ -69,9 +71,13 @@ Supported names:
 ```env
 LLM_API_KEY=...
 DEEPSEEK_API_KEY=...
+LLM_REQUEST_TIMEOUT_SECONDS=60
+REQUEST_TIMEOUT_SECONDS=60
 ```
 
 `LLM_API_KEY` is the preferred generic name. `DEEPSEEK_API_KEY` remains supported for compatibility with the current MVP.
+
+`LLM_REQUEST_TIMEOUT_SECONDS` is the preferred generic timeout override. `REQUEST_TIMEOUT_SECONDS` remains supported for compatibility with the current MVP. This timeout controls how long the backend waits for the LLM provider to finish a request before returning a controlled timeout error. Complex generated apps may need a higher value than the default.
 
 No API key is written to `config/app.config.json`, frontend source, frontend build output, README examples with real values, tests, or docs.
 
@@ -87,7 +93,7 @@ Details:
 
 - Code defaults keep the app bootable when the config file is missing.
 - `config/app.config.json` provides shared non-sensitive defaults.
-- Environment variables may override backend runtime values such as API key, base URL, model, timeout, and HTML length limits.
+- Environment variables may override backend runtime values such as API key, base URL, model, LLM request timeout, and HTML length limits.
 - Product copy such as waiting texts and About text should usually come from `config/app.config.json`, not `.env`.
 
 ## Backend Design
@@ -99,7 +105,9 @@ Backend config loading should:
 - Fall back to built-in defaults if the file is missing.
 - Fail fast with a clear error if the file exists but contains invalid JSON or invalid field types.
 - Use `llm.baseUrl` and `llm.model` as defaults for `DeepSeekClient`.
+- Use `llm.requestTimeoutSeconds` as the default LLM provider timeout.
 - Use `LLM_API_KEY` first, then `DEEPSEEK_API_KEY`, for the API key.
+- Use `LLM_REQUEST_TIMEOUT_SECONDS` first, then `REQUEST_TIMEOUT_SECONDS`, for the LLM provider timeout.
 - Preserve current env compatibility:
   - `DEEPSEEK_BASE_URL`
   - `DEEPSEEK_MODEL`
@@ -162,6 +170,7 @@ It must never return API keys, raw env values, request headers, or backend-only 
 - Invalid UI fields:
   - empty waiting text list: fall back to default waiting texts or reject with a clear validation error.
   - non-positive switch delay: fall back or reject with a clear validation error.
+  - non-positive LLM request timeout: fall back or reject with a clear validation error.
 - Missing API key: keep existing behavior, return a controlled backend error when an LLM route is called.
 
 ## Testing
@@ -170,7 +179,9 @@ Backend tests:
 
 - Loads defaults when `config/app.config.json` is missing.
 - Loads LLM base URL/model from config file.
+- Loads LLM request timeout from config file.
 - `LLM_API_KEY` takes priority over `DEEPSEEK_API_KEY`.
+- `LLM_REQUEST_TIMEOUT_SECONDS` takes priority over `REQUEST_TIMEOUT_SECONDS`.
 - Existing `DEEPSEEK_*` environment variables remain compatible.
 - Invalid config JSON produces a clear error.
 - Runtime config never serializes API keys.
@@ -198,8 +209,17 @@ Update README with:
 - `config/app.config.json` location and example.
 - `.env` API key guidance.
 - Supported env variable names.
+- LLM timeout guidance for complex app generation.
 - Warning that API keys must not be committed.
 - Example commands for editing config and starting frontend/backend.
+
+Add an example env file:
+
+```text
+backend/.env.example
+```
+
+The example must include API key placeholders, model/base URL overrides, request timeout overrides, and comments explaining that users should copy it to `backend/.env` and fill in their own key.
 
 Update acceptance docs if behavior changes are visible to users.
 
