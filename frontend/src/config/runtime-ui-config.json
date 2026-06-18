@@ -1,0 +1,11 @@
+{
+  "systemName": "VibeWebOS",
+  "aboutText": "VibeWebOS 是一个中文浏览器桌面 MVP。它以 Windows 11 风格呈现多窗口应用、浏览器和由大模型生成的页面内容，所有状态仅保存在当前浏览器内存中。",
+  "waitingTexts": [
+    "正在整理你的想法...",
+    "正在生成一个更像应用的界面...",
+    "正在检查页面结构...",
+    "正在准备窗口内容..."
+  ],
+  "waitingTextSwitchDelayMs": 5000
+}

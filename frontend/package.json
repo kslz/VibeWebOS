@@ -4,11 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "sync-config": "node scripts/sync-runtime-ui-config.mjs",
+    "predev": "npm run sync-config",
     "dev": "vite --host 0.0.0.0",
+    "prebuild": "npm run sync-config",
     "build": "vue-tsc -b && vite build",
+    "prelint": "npm run sync-config",
     "lint": "eslint \"src/**/*.{ts,vue}\"",
+    "pretest": "npm run sync-config",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
+    "pretypecheck": "npm run sync-config",
     "typecheck": "vue-tsc -b"
   },
   "dependencies": {
